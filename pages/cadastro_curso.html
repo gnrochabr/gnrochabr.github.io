@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cadastro de Curso - CH Docente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+    <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <a href="../index.html" class="btn btn-secondary mb-4">
+            <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+        </a>
+        <div class="form-section">
+            <h2 class="mb-4 text-info"><i class="fas fa-book-open me-2"></i> Cadastrar Novo Curso</h2>
+
+            <form id="formCadastroCurso">
+                <div class="mb-3">
+                    <label for="nomeCurso" class="form-label">Nome do Curso:</label>
+                    <input type="text" class="form-control" id="nomeCurso" required />
+                </div>
+                <div class="mb-3">
+                    <label for="codigoCurso" class="form-label">Código do Curso:</label>
+                    <input type="text" class="form-control" id="codigoCurso" required />
+                </div>
+                <div class="mb-4">
+                    <label for="grauCurso" class="form-label">Grau:</label>
+                    <select class="form-select" id="grauCurso" required>
+                        <option selected disabled value="">Selecione o grau</option>
+                        <option value="Técnico">Técnico</option>
+                        <option value="Tecnólogo">Tecnólogo</option>
+                        <option value="Superior">Superior</option>
+                        <option value="Extensão">Extensão</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="modalidadeOfertaCurso" class="form-label">Modalidade de Oferta:</label>
+                    <select class="form-select" id="modalidadeOfertaCurso" required>
+                        <option selected disabled value="">Selecione a modalidade</option>
+                        <option value="Presencial">Presencial</option>
+                        <option value="Híbrido">Híbrido</option>
+                        <option value="EAD">EAD</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-info">
+                    <i class="fas fa-save me-2"></i> Cadastrar Curso
+                </button>
+                <button type="button" class="btn btn-secondary ms-2" id="cancelarEdicao" style="display: none;">
+                    Cancelar
+                </button>
+            </form>
+
+            <h3 class="mt-5 mb-3 text-secondary">Cursos Cadastrados</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nome do Curso</th>
+                            <th>Código</th>
+                            <th>Modalidade</th>
+                            <th>Grau</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="../js/cadastroCurso.js"></script>
+</body>
+</html>

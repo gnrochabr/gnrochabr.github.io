@@ -1,0 +1,187 @@
+const API_BASE_URL = 'http://localhost:3000/api';
+
+async function fetchData(endpoint, method = 'GET', data = null) {
+    const url = `${API_BASE_URL}/${endpoint}`;
+    const options = { method, headers: { 'Content-Type': 'application/json' } };
+    if (data) options.body = JSON.stringify(data);
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Erro na requisição: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Erro na operação fetchData:', error);
+        throw error;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const form = document.getElementById('formCadastroTurma');
+    const nomeTurmaInput = document.getElementById('nomeTurma');
+    const cursoTurmaSelect = document.getElementById('cursoTurma');
+    const modalidadeTurmaSelect = document.getElementById('modalidadeTurma');
+    const periodoLetivoTurmaInput = document.getElementById('periodoLetivoTurma');
+    const turnoTurmaSelect = document.getElementById('turnoTurma');
+    const turmasTableBody = document.querySelector('.table-responsive tbody');
+    const btnSalvarTurma = document.getElementById('btnSalvarTurma');
+    const btnCancelarEdicaoTurma = document.getElementById('btnCancelarEdicaoTurma');
+
+    let allCursos = [];
+    let editingId = null;
+
+    function gerarNomeTurma() {
+        if (editingId) return;
+
+        const periodo = periodoLetivoTurmaInput.value.trim();
+        const cursoId = cursoTurmaSelect.value;
+        const turno = turnoTurmaSelect.value;
+
+        let codigoCurso = '';
+        if (cursoId && allCursos.length) {
+            const curso = allCursos.find(c => c._id === cursoId);
+            if (curso) codigoCurso = curso.codigo || '';
+        }
+
+        const primeiraLetraTurno = turno ? turno.charAt(0).toUpperCase() : '';
+
+        if (periodo && codigoCurso && primeiraLetraTurno) {
+            nomeTurmaInput.value = `${periodo}.${codigoCurso}.${primeiraLetraTurno}`;
+        } else {
+            nomeTurmaInput.value = '';
+        }
+    }
+
+    async function populateCursos() {
+        try {
+            const cursos = await fetchData('cursos');
+            allCursos = cursos;
+            cursoTurmaSelect.innerHTML = '<option selected disabled value="">Selecione o curso</option>';
+            cursos.forEach(curso => {
+                const option = document.createElement('option');
+                option.value = curso._id;
+                option.textContent = curso.nome;
+                cursoTurmaSelect.appendChild(option);
+            });
+        } catch (error) {
+            alert('Erro ao carregar cursos de lotação.');
+            console.error(error);
+        }
+    }
+
+    async function loadTurmas() {
+        try {
+            const turmas = await fetchData('turmas');
+            turmasTableBody.innerHTML = '';
+
+            if (!turmas.length) {
+                turmasTableBody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma turma cadastrada.</td></tr>';
+                return;
+            }
+
+            turmas.forEach(turma => {
+                const row = turmasTableBody.insertRow();
+                row.insertCell().textContent = turma.nome;
+                row.insertCell().textContent = turma.cursoId?.nome || 'N/A';
+                row.insertCell().textContent = turma.modalidade; // corrigido aqui
+                row.insertCell().textContent = turma.periodoLetivo;
+                row.insertCell().textContent = turma.turno;
+                const actionsCell = row.insertCell();
+                actionsCell.innerHTML = `
+                    <button class="btn btn-sm btn-outline-primary me-1" title="Editar" onclick="editTurma('${turma._id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" title="Excluir" onclick="deleteTurma('${turma._id}')">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+            });
+        } catch (error) {
+            turmasTableBody.innerHTML = `<tr><td colspan="6" class="text-danger text-center">Erro ao carregar turmas.</td></tr>`;
+            alert(`Erro ao carregar turmas: ${error.message}`);
+            console.error(error);
+        }
+    }
+
+    function resetForm() {
+        form.reset();
+        nomeTurmaInput.value = '';
+        editingId = null;
+        btnSalvarTurma.innerHTML = '<i class="fas fa-save me-2"></i> Cadastrar Turma';
+        btnSalvarTurma.classList.remove('btn-success');
+        btnSalvarTurma.classList.add('btn-primary');
+        btnCancelarEdicaoTurma.classList.add('d-none');
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const turmaData = {
+            nome: nomeTurmaInput.value.trim(),
+            cursoId: cursoTurmaSelect.value,
+            modalidade: modalidadeTurmaSelect.value, // corrigido aqui
+            periodoLetivo: periodoLetivoTurmaInput.value.trim(),
+            turno: turnoTurmaSelect.value,
+        };
+
+        try {
+            if (editingId) {
+                await fetchData(`turmas/${editingId}`, 'PATCH', turmaData);
+                alert('Turma atualizada com sucesso!');
+            } else {
+                await fetchData('turmas', 'POST', turmaData);
+                alert('Turma cadastrada com sucesso!');
+            }
+            resetForm();
+            await loadTurmas();
+        } catch (error) {
+            alert(`Erro ao salvar turma: ${error.message}`);
+            console.error(error);
+        }
+    });
+
+    window.editTurma = async (id) => {
+        try {
+            const turma = await fetchData(`turmas/${id}`);
+            cursoTurmaSelect.value = turma.cursoId?._id || turma.cursoId || '';
+            modalidadeTurmaSelect.value = turma.modalidade; // corrigido aqui
+            periodoLetivoTurmaInput.value = turma.periodoLetivo;
+            turnoTurmaSelect.value = turma.turno;
+            nomeTurmaInput.value = turma.nome;
+
+            editingId = turma._id;
+
+            btnSalvarTurma.innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Turma';
+            btnSalvarTurma.classList.remove('btn-primary');
+            btnSalvarTurma.classList.add('btn-success');
+            btnCancelarEdicaoTurma.classList.remove('d-none');
+        } catch (error) {
+            alert(`Erro ao carregar turma para edição: ${error.message}`);
+            console.error(error);
+        }
+    };
+
+    window.deleteTurma = async (id) => {
+        if (confirm('Tem certeza que deseja excluir esta turma? Esta ação é irreversível.')) {
+            try {
+                await fetchData(`turmas/${id}`, 'DELETE');
+                alert('Turma excluída com sucesso!');
+                await loadTurmas();
+            } catch (error) {
+                alert(`Erro ao excluir turma: ${error.message}`);
+                console.error(error);
+            }
+        }
+    };
+
+    cursoTurmaSelect.addEventListener('change', gerarNomeTurma);
+    periodoLetivoTurmaInput.addEventListener('input', gerarNomeTurma);
+    turnoTurmaSelect.addEventListener('change', gerarNomeTurma);
+
+    btnCancelarEdicaoTurma.addEventListener('click', resetForm);
+
+    await populateCursos();
+    await loadTurmas();
+});
