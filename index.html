@@ -6,66 +6,136 @@
     <title>Dashboard - Carga Horária Docente</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+        }
+        .header {
+            background-color: #2f9e41; /* Azul principal do IFES */
+            color: white;
+            padding: 1rem 0;
+            border-bottom: 5px solid #cd191e; /* Detalhe em verde */
+        }
+        .header img {
+            max-height: 90px;
+        }
+        .header h1 {
+            font-weight: 700;
+        }
+        .custom-card-link {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: none;
+            border-radius: 0.5rem;
+            background-color: white;
+            color: #333;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .custom-card-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+            background-color: #e9ecef;
+        }
+        .custom-card-link .card-icon {
+            color: #2f9e41; /* Cor dos ícones */
+            margin-bottom: 1rem;
+        }
+        .custom-card-link h5 {
+            font-weight: 600;
+            color: #35bd47;
+        }
+        .custom-card-link p {
+            color: #6c757d;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <div class="container mt-5">
-        <div class="card shadow-sm p-4">
-            <h1 class="text-center mb-4 text-primary">
-                <i class="fas fa-chalkboard-teacher me-2"></i> Dashboard de Carga Horária Docente
-            </h1>
-            <p class="text-center text-muted mb-5">Gerencie a distribuição e o cadastro de professores, turmas e cargas horárias.</p>
+<body>
 
-            <div class="row g-4 justify-content-center">
-
-                <div class="col-md-4 col-lg-3">
-                    <a href="pages/cadastro_curso.html" class="card card-body text-center bg-info text-white h-100 d-flex flex-column justify-content-center align-items-center custom-card-link">
-                        <i class="fas fa-book-open fa-3x mb-3"></i>
-                        <h5 class="card-title">Cadastrar Curso</h5>
-                        <p class="card-text">Adicione e gerencie os cursos da instituição.</p>
-                    </a>
-                </div>
-
-                <div class="col-md-4 col-lg-3">
-                    <a href="pages/cadastro_professor.html" class="card card-body text-center bg-success text-white h-100 d-flex flex-column justify-content-center align-items-center custom-card-link">
-                        <i class="fas fa-user-plus fa-3x mb-3"></i>
-                        <h5 class="card-title">Cadastrar Professor</h5>
-                        <p class="card-text">Adicione novos docentes ao sistema.</p>
-                    </a>
-                </div>
-
-                <div class="col-md-4 col-lg-3">
-                    <a href="pages/cadastro_disciplina.html" class="card card-body text-center bg-warning text-dark h-100 d-flex flex-column justify-content-center align-items-center custom-card-link">
-                        <i class="fas fa-book-reader fa-3x mb-3"></i>
-                        <h5 class="card-title">Cadastrar Disciplina</h5>
-                        <p class="card-text">Registre novas disciplinas e suas cargas.</p>
-                    </a>
-                </div>
-
-                <div class="col-md-4 col-lg-3">
-                    <a href="pages/cadastro_turma.html" class="card card-body text-center bg-primary text-white h-100 d-flex flex-column justify-content-center align-items-center custom-card-link">
-                        <i class="fas fa-users fa-3x mb-3"></i>
-                        <h5 class="card-title">Cadastrar Turma</h5>
-                        <p class="card-text">Registre novas turmas e seus detalhes.</p>
-                    </a>
-                </div>
-                
-                <div class="col-md-4 col-lg-3">
-                    <a href="pages/cadastro_ch.html" class="card card-body text-center bg-dark text-white h-100 d-flex flex-column justify-content-center align-items-center custom-card-link">
-                        <i class="fas fa-clock fa-3x mb-3"></i>
-                        <h5 class="card-title">Atribuir Carga Horária</h5>
-                        <p class="card-text">Gerencie a distribuição de carga horária.</p>
-                    </a>
-                </div>
-
-                <div class="col-md-4 col-lg-3">
-                    <a href="pages/relatorio_docente.html" class="card card-body text-center bg-secondary text-white h-100 d-flex flex-column justify-content-center align-items-center custom-card-link">
-                        <i class="fas fa-file-alt fa-3x mb-3"></i>
-                        <h5 class="card-title">Relatório Docente</h5>
-                        <p class="card-text">Visualize a carga horária de cada professor.</p>
-                    </a>
-                </div>
+    <header class="header text-center">
+        <div class="container">
+            <div class="d-flex justify-content-center align-items-center mb-3">
+                <img src="img/nova-venecia-horizontal-branco.png" alt="Logo IFES Campus Nova Venécia" class="img-fluid me-3">
+                <div>
+                <h1 class="h2 mb-0">Dashboard de Carga Horária</h1>
+                <p class="lead text-white-50 mb-0">Sistema de Gerenciamento e Ajuste de Carga Horária Docente.</p>
             </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container my-5">
+        <div class="row g-4 justify-content-center">
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <a href="pages/cadastro_curso.html" class="card custom-card-link p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-book-open fa-3x card-icon"></i>
+                    <h5 class="card-title text-center">Cadastrar Curso</h5>
+                    <p class="card-text text-center">Adicione e gerencie os cursos da instituição.</p>
+                </a>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <a href="pages/cadastro_professor.html" class="card custom-card-link p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-user-plus fa-3x card-icon"></i>
+                    <h5 class="card-title text-center">Cadastrar Professor</h5>
+                    <p class="card-text text-center">Adicione novos docentes ao sistema.</p>
+                </a>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <a href="pages/cadastro_disciplina.html" class="card custom-card-link p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-book-reader fa-3x card-icon"></i>
+                    <h5 class="card-title text-center">Cadastrar Disciplina</h5>
+                    <p class="card-text text-center">Registre novas disciplinas e suas cargas.</p>
+                </a>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <a href="pages/cadastro_turma.html" class="card custom-card-link p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-users fa-3x card-icon"></i>
+                    <h5 class="card-title text-center">Cadastrar Turma</h5>
+                    <p class="card-text text-center">Registre novas turmas e seus detalhes.</p>
+                </a>
+            </div>
+
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <a href="pages/cadastro_ch.html" class="card custom-card-link p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-clock fa-3x card-icon"></i>
+                    <h5 class="card-title text-center">Cadastrar CH</h5>
+                    <p class="card-text text-center">Gerencie a distribuição de carga horária.</p>
+                </a>
+            </div>
+            
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <a href="pages/relatorio_area.html" class="card custom-card-link p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-chart-pie fa-3x card-icon"></i>
+                    <h5 class="card-title text-center">Relatório por Área</h5>
+                    <p class="card-text text-center">Visualize a ch em cada área de conhecimento.</p>
+                </a>
+            </div>
+            
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <a href="pages/relatorio_docente.html" class="card custom-card-link p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-file-alt fa-3x card-icon"></i>
+                    <h5 class="card-title text-center">Relatório Docente</h5>
+                    <p class="card-text text-center">Visualize a carga horária de cada professor.</p>
+                </a>
+            </div>
+            
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                <a href="pages/relatorio_geral.html" class="card custom-card-link p-4 h-100 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-archive fa-3x card-icon "></i>
+                    <h5 class="card-title text-center">Relatório Geral</h5>
+                    <p class="card-text text-center">Visualize a CH Completa, disciplinas, áreas e cursos.
+
+</p>
+                </a>
+            </div>
+
         </div>
     </div>
 

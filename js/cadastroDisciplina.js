@@ -1,11 +1,13 @@
-// Arquivo base ou em cada script JS
+// Arquivo: ../js/cadastroDisciplina.js
+
+// --- Configurações e Funções Auxiliares ---
 const API_BASE_URL = 'http://localhost:3000/api';
 
 /**
  * Função genérica para fazer requisições à API.
  * @param {string} endpoint - O endpoint da API (ex: 'disciplinas').
  * @param {string} method - O método HTTP (GET, POST, PUT, PATCH, DELETE).
- * @param {object} data - Os dados a serem enviados no corpo da requisição (para POST/PUT/PATCH).
+ * @param {object} data - Os dados a serem enviados no corpo da requisição.
  * @returns {Promise<object>} Os dados da resposta da API.
  * @throws {Error} Se a requisição não for bem-sucedida.
  */
@@ -23,175 +25,281 @@ async function fetchData(endpoint, method = 'GET', data = null) {
     try {
         const response = await fetch(url, options);
         if (!response.ok) {
-            // Tenta obter a mensagem de erro do backend ou usa uma mensagem padrão
             const errorData = await response.json();
             throw new Error(errorData.message || `Erro na requisição: ${response.statusText}`);
         }
         return await response.json();
     } catch (error) {
-        console.error('Erro na operação:', error);
-        // REMOVIDO: alert(`Erro: ${error.message}`);
-        // O alerta agora é tratado nas funções que chamam fetchData para evitar duplicação.
-        throw error; // Re-lança o erro para ser tratado pela função chamadora
+        console.error(`Erro na operação ${method} para ${endpoint}:`, error);
+        throw error;
     }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // Obtenção dos elementos do DOM
-    const formCadastroDisciplina = document.getElementById('formCadastroDisciplina');
-    const nomeDisciplinaInput = document.getElementById('nomeDisciplina');
-    const codigoDisciplinaInput = document.getElementById('codigoDisciplina');
-    const cargaHorariaTotalHorasInput = document.getElementById('cargaHorariaTotalHoras');
-    const areaDisciplinaInput = document.getElementById('areaDisciplina'); // Elemento para a área da disciplina
-    const disciplinasTableBody = document.querySelector('#formCadastroDisciplina + h3 + .table-responsive tbody');
-    const btnSalvarDisciplina = document.getElementById('btnSalvarDisciplina');
-    const btnCancelarEdicao = document.getElementById('btnCancelarEdicao');
+/**
+ * Gera um código de pré-visualização para a disciplina.
+ * @param {string} nome - O nome da disciplina.
+ * @returns {string} O código gerado.
+ */
+function generatePreviewCode(nome) {
+    if (!nome || nome.length < 4) return '';
+    const prefix = nome.substring(0, 4).toUpperCase();
+    const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${prefix}-${suffix}`;
+}
 
-    let editingId = null; // Variável para armazenar o ID da disciplina em edição
+// --- Funções Principais do Sistema ---
+const dom = {
+    form: document.getElementById('formCadastroDisciplina'),
+    nome: document.getElementById('nomeDisciplina'),
+    codigo: document.getElementById('codigoDisciplina'),
+    cargaHoraria: document.getElementById('cargaHorariaTotalHoras'),
+    areaSelect: document.getElementById('areaDisciplina'),
+    outraAreaField: document.getElementById('outraAreaField'),
+    outraAreaInput: document.getElementById('outraArea'),
+    tableBody: document.querySelector('table tbody'),
+    btnSalvar: document.getElementById('btnSalvarDisciplina'),
+    btnCancelar: document.getElementById('btnCancelarEdicao'),
+    
+    btnExportarXLS: document.getElementById('btnExportarXLS'),
+    btnExportarODP: document.getElementById('btnExportarODP'),
+};
 
-    /**
-     * Gera um código de pré-visualização para a disciplina.
-     * @param {string} nome - O nome da disciplina.
-     * @returns {string} O código gerado.
-     */
-    function generatePreviewCode(nome) {
-        if (!nome || nome.length < 4) return '';
-        // Gerar um código mais robusto para evitar colisões
-        return nome.substring(0, 4).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-    }
+let allDisciplinas = [];
+let editingId = null;
 
-    // Event listener para gerar o código da disciplina automaticamente ao digitar o nome (apenas na criação)
-    nomeDisciplinaInput.addEventListener('input', () => {
-        if (!editingId) { // Só gera o código se NÃO estiver em modo de edição
-            codigoDisciplinaInput.value = generatePreviewCode(nomeDisciplinaInput.value);
-        }
-    });
+/**
+ * Carrega e popula o dropdown de áreas de disciplina.
+ */
+async function loadAreas() {
+    try {
+        const areas = await fetchData('disciplinas/areas');
+        
+        const fixedOptions = [];
+        
+        dom.areaSelect.innerHTML = '<option value="" disabled selected>Selecione a área</option>';
+        
+        fixedOptions.forEach(area => {
+            const option = new Option(area, area);
+            dom.areaSelect.add(option);
+        });
 
-    /**
-     * Carrega e exibe a lista de disciplinas na tabela.
-     */
-    async function loadDisciplinas() {
-        try {
-            const disciplinas = await fetchData('disciplinas');
-            disciplinasTableBody.innerHTML = ''; // Limpa o corpo da tabela
-
-            if (disciplinas && disciplinas.length > 0) {
-                disciplinas.forEach(disciplina => {
-                    const row = disciplinasTableBody.insertRow();
-                    row.insertCell().textContent = disciplina.nome;
-                    row.insertCell().textContent = disciplina.codigo;
-                    row.insertCell().textContent = `${disciplina.cargaHorariaTotalHoras}h`;
-                    row.insertCell().textContent = disciplina.areaDisciplina || 'N/A'; // Exibe a área da disciplina
-                    row.insertCell().innerHTML = `
-                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editDisciplina('${disciplina._id}')" title="Editar"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteDisciplina('${disciplina._id}')" title="Excluir"><i class="fas fa-trash-alt"></i></button>
-                    `;
-                });
-            } else {
-                disciplinasTableBody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhuma disciplina cadastrada.</td></tr>'; // colspan ajustado para 5 colunas
+        areas.forEach(area => {
+            if (area && !fixedOptions.includes(area) && !dom.areaSelect.querySelector(`option[value="${area}"]`)) {
+                const newOption = new Option(area, area);
+                dom.areaSelect.add(newOption);
             }
-        } catch (error) {
-            console.error('Erro ao carregar disciplinas:', error);
-            disciplinasTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar disciplinas.</td></tr>'; // colspan ajustado
-            alert(`Erro ao carregar disciplinas: ${error.message}`); // Alerta o usuário sobre o erro
+        });
+        
+        const outroOption = new Option('Outro...', 'Outro');
+        dom.areaSelect.add(outroOption);
+
+    } catch (error) {
+        console.error('Erro ao carregar áreas:', error);
+    }
+}
+
+/**
+ * Carrega e exibe a lista de disciplinas na tabela.
+ */
+async function loadDisciplinas() {
+    try {
+        const disciplinas = await fetchData('disciplinas');
+        allDisciplinas = disciplinas;
+        dom.tableBody.innerHTML = '';
+
+        if (disciplinas && disciplinas.length > 0) {
+            disciplinas.forEach(disciplina => {
+                const row = dom.tableBody.insertRow();
+                row.innerHTML = `
+                    <td>${disciplina.nome}</td>
+                    <td>${disciplina.codigo}</td>
+                    <td>${disciplina.cargaHorariaTotalHoras}h</td>
+                    <td>${disciplina.areaDisciplina || 'N/A'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="window.editDisciplina('${disciplina._id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.deleteDisciplina('${disciplina._id}')" title="Excluir"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                `;
+            });
+        } else {
+            dom.tableBody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhuma disciplina cadastrada.</td></tr>';
         }
+    } catch (error) {
+        console.error('Erro ao carregar disciplinas:', error);
+        dom.tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar disciplinas.</td></tr>';
+        alert(`Erro ao carregar disciplinas: ${error.message}`);
+    }
+}
+
+// Funções para exportação
+function exportarParaXLSX() {
+    if (allDisciplinas.length === 0) {
+        alert('Não há dados de disciplinas para exportar.');
+        return;
     }
 
-    // Event listener para o envio do formulário (cadastro ou atualização)
-    formCadastroDisciplina.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Previne o comportamento padrão de recarregar a página
+    const dataForExport = allDisciplinas.map(disciplina => ({
+        'Nome da Disciplina': disciplina.nome,
+        'Código': disciplina.codigo,
+        'Carga Horária Total (Horas)': disciplina.cargaHorariaTotalHoras,
+        'Área da Disciplina': disciplina.areaDisciplina || 'N/A'
+    }));
 
-        const disciplinaData = {
-            nome: nomeDisciplinaInput.value,
-            cargaHorariaTotalHoras: parseInt(cargaHorariaTotalHorasInput.value),
-            areaDisciplina: areaDisciplinaInput.value // Adicionando o campo areaDisciplina
-        };
+    const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Disciplinas Cadastradas");
+    XLSX.writeFile(workbook, "disciplinas_cadastradas.xlsx");
+}
 
-        // Se estiver em modo de criação, adicione o código gerado.
-        // Se estiver editando, o código não será alterado a menos que o backend permita ou exija.
+function exportarParaODS() {
+    if (allDisciplinas.length === 0) {
+        alert('Não há dados de disciplinas para exportar.');
+        return;
+    }
+    
+    const dataForExport = allDisciplinas.map(disciplina => ({
+        'Nome da Disciplina': disciplina.nome,
+        'Código': disciplina.codigo,
+        'Carga Horária Total (Horas)': disciplina.cargaHorariaTotalHoras,
+        'Área da Disciplina': disciplina.areaDisciplina || 'N/A'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Disciplinas Cadastradas");
+    XLSX.writeFile(workbook, "disciplinas_cadastradas.ods");
+}
+
+/**
+ * Reseta o formulário para o estado inicial.
+ */
+function resetForm() {
+    dom.form.reset();
+    dom.codigo.value = '';
+    editingId = null;
+    dom.btnSalvar.innerHTML = '<i class="fas fa-save me-2"></i> Cadastrar Disciplina';
+    dom.btnSalvar.classList.remove('btn-success');
+    dom.btnSalvar.classList.add('btn-warning');
+    dom.btnCancelar.classList.add('d-none');
+    dom.outraAreaField.style.display = 'none';
+    dom.areaSelect.value = '';
+}
+
+/**
+ * Preenche o formulário com dados de uma disciplina para edição.
+ * @param {string} id - O ID da disciplina.
+ */
+window.editDisciplina = async (id) => {
+    try {
+        const disciplina = await fetchData(`disciplinas/${id}`);
+        dom.nome.value = disciplina.nome;
+        dom.codigo.value = disciplina.codigo;
+        dom.cargaHoraria.value = disciplina.cargaHorariaTotalHoras;
+        dom.areaSelect.value = disciplina.areaDisciplina || '';
+        
+        editingId = disciplina._id;
+        dom.btnSalvar.innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Disciplina';
+        dom.btnSalvar.classList.remove('btn-warning');
+        dom.btnSalvar.classList.add('btn-success');
+        dom.btnCancelar.classList.remove('d-none');
+        dom.outraAreaField.style.display = 'none';
+    } catch (error) {
+        alert(`Erro ao carregar disciplina para edição: ${error.message}`);
+    }
+};
+
+/**
+ * Exclui uma disciplina após confirmação.
+ * @param {string} id - O ID da disciplina.
+ */
+window.deleteDisciplina = async (id) => {
+    if (confirm('Tem certeza que deseja excluir esta disciplina? Esta ação é irreversível.')) {
+        try {
+            await fetchData(`disciplinas/${id}`, 'DELETE');
+            alert('Disciplina excluída com sucesso!');
+            await loadDisciplinas();
+            await loadAreas(); 
+        } catch (error) {
+            alert(`Erro ao excluir disciplina: ${error.message}`);
+        }
+    }
+};
+
+/**
+ * Gerencia o envio do formulário, seja para cadastro ou edição.
+ */
+async function handleFormSubmit(event) {
+    event.preventDefault();
+
+    let areaFinal = dom.areaSelect.value;
+    if (areaFinal === 'Outro' && dom.outraAreaInput.value.trim() !== '') {
+        areaFinal = dom.outraAreaInput.value.trim();
+    }
+
+    const disciplinaData = {
+        nome: dom.nome.value,
+        cargaHorariaTotalHoras: parseInt(dom.cargaHoraria.value),
+        areaDisciplina: areaFinal
+    };
+
+    if (!editingId) {
+        disciplinaData.codigo = dom.codigo.value;
+    }
+
+    try {
+        if (editingId) {
+            await fetchData(`disciplinas/${editingId}`, 'PATCH', disciplinaData);
+            alert('Disciplina atualizada com sucesso!');
+        } else {
+            await fetchData('disciplinas', 'POST', disciplinaData);
+            alert('Disciplina cadastrada com sucesso!');
+        }
+
+        resetForm();
+        await loadAreas(); 
+        await loadDisciplinas();
+    } catch (error) {
+        alert(`Erro ao salvar disciplina: ${error.message}`);
+    }
+}
+
+/**
+ * Configura todos os event listeners da página.
+ */
+function setupEventListeners() {
+    dom.nome.addEventListener('input', () => {
         if (!editingId) {
-            disciplinaData.codigo = codigoDisciplinaInput.value;
-        }
-
-        try {
-            if (editingId) {
-                // Requisição PATCH para atualizar uma disciplina existente
-                await fetchData(`disciplinas/${editingId}`, 'PATCH', disciplinaData);
-                alert('Disciplina atualizada com sucesso!');
-            } else {
-                // Requisição POST para cadastrar uma nova disciplina
-                await fetchData('disciplinas', 'POST', disciplinaData);
-                alert('Disciplina cadastrada com sucesso!');
-            }
-
-            resetForm(); // Limpa o formulário e reseta o estado
-            await loadDisciplinas(); // Recarrega a lista de disciplinas
-        } catch (error) {
-            console.error('Erro ao salvar disciplina:', error);
-            alert(`Erro ao salvar disciplina: ${error.message}`); // Alerta o usuário sobre o erro
+            dom.codigo.value = generatePreviewCode(dom.nome.value);
         }
     });
 
-    /**
-     * Reseta o formulário para o estado inicial de cadastro.
-     */
-    function resetForm() {
-        formCadastroDisciplina.reset(); // Limpa todos os campos do formulário
-        codigoDisciplinaInput.value = ''; // Garante que o campo de código seja limpo
-        editingId = null; // Reseta o ID de edição
-        btnSalvarDisciplina.innerHTML = '<i class="fas fa-save me-2"></i> Cadastrar Disciplina'; // Altera texto do botão
-        btnSalvarDisciplina.classList.remove('btn-success'); // Remove classe de sucesso (edição)
-        btnSalvarDisciplina.classList.add('btn-warning'); // Adiciona classe de aviso (cadastro)
-        btnCancelarEdicao.classList.add('d-none'); // Esconde o botão de cancelar edição
-    }
-
-    /**
-     * Preenche o formulário com os dados de uma disciplina para edição.
-     * Esta função é global (window.editDisciplina) para ser acessível via onclick na tabela.
-     * @param {string} id - O ID da disciplina a ser editada.
-     */
-    window.editDisciplina = async (id) => {
-        try {
-            const disciplina = await fetchData(`disciplinas/${id}`);
-            nomeDisciplinaInput.value = disciplina.nome;
-            codigoDisciplinaInput.value = disciplina.codigo; // Exibe o código existente da disciplina
-            cargaHorariaTotalHorasInput.value = disciplina.cargaHorariaTotalHoras;
-            areaDisciplinaInput.value = disciplina.areaDisciplina || ''; // Preenche a área da disciplina
-
-            editingId = disciplina._id; // Define o ID da disciplina que está sendo editada
-            btnSalvarDisciplina.innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Disciplina'; // Altera texto do botão
-            btnSalvarDisciplina.classList.remove('btn-warning'); // Remove classe de aviso
-            btnSalvarDisciplina.classList.add('btn-success'); // Adiciona classe de sucesso
-            btnCancelarEdicao.classList.remove('d-none'); // Mostra o botão de cancelar edição
-        } catch (error) {
-            console.error('Erro ao carregar disciplina para edição:', error);
-            alert(`Erro ao carregar disciplina para edição: ${error.message}`); // Alerta o usuário sobre o erro
+    dom.areaSelect.addEventListener('change', () => {
+        if (dom.areaSelect.value === 'Outro') {
+            dom.outraAreaField.style.display = 'block';
+            dom.outraAreaInput.setAttribute('required', 'required');
+        } else {
+            dom.outraAreaField.style.display = 'none';
+            dom.outraAreaInput.removeAttribute('required');
+            dom.outraAreaInput.value = '';
         }
-    };
-
-    /**
-     * Exclui uma disciplina após confirmação.
-     * Esta função é global (window.deleteDisciplina) para ser acessível via onclick na tabela.
-     * @param {string} id - O ID da disciplina a ser excluída.
-     */
-    window.deleteDisciplina = async (id) => {
-        if (confirm('Tem certeza que deseja excluir esta disciplina? Esta ação é irreversível.')) {
-            try {
-                await fetchData(`disciplinas/${id}`, 'DELETE');
-                alert('Disciplina excluída com sucesso!');
-                await loadDisciplinas(); // Recarrega a lista após a exclusão
-            } catch (error) {
-                console.error('Erro ao excluir disciplina:', error);
-                alert(`Erro ao excluir disciplina: ${error.message}`); // Alerta o usuário sobre o erro
-            }
-        }
-    };
-
-    // Event listener para o botão de cancelar edição
-    btnCancelarEdicao.addEventListener('click', () => {
-        resetForm(); // Volta o formulário para o estado de cadastro
     });
 
-    // Carrega as disciplinas ao iniciar a página
+    dom.form.addEventListener('submit', handleFormSubmit);
+    dom.btnCancelar.addEventListener('click', resetForm);
+    
+    // Event listeners para os botões de exportação
+    dom.btnExportarXLS.addEventListener('click', exportarParaXLSX);
+    dom.btnExportarODP.addEventListener('click', exportarParaODS);
+}
+
+/**
+ * Função de inicialização da página.
+ */
+async function init() {
+    setupEventListeners();
+    await loadAreas();
     await loadDisciplinas();
-});
+}
+
+// Inicia o script quando a página é completamente carregada.
+document.addEventListener('DOMContentLoaded', init);

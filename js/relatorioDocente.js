@@ -25,26 +25,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const tableHeaderRow = document.getElementById('tableHeaderRow');
     const filtroGeralInput = document.getElementById('filtroGeral');
     const btnGerarRelatorio = document.getElementById('btnGerarRelatorio');
-    const btnExportarPdf = document.getElementById('btnExportarPdf');
+    const btnExportarXLS = document.getElementById('btnExportarXLS');
+    const btnExportarODP = document.getElementById('btnExportarODP');
     const cargaMinimaHorasInput = document.getElementById('cargaMinimaHoras');
     const cargaMaximaHorasInput = document.getElementById('cargaMaximaHoras');
 
     let allDados = [];
-    let cursosUnicos = []; // Changed from disciplinasUnicas
+    let cursosUnicos = [];
+    // Esta nova variável vai armazenar os dados de professores filtrados e processados
+    let profsFiltradosParaExportacao = []; 
 
     async function carregarDados() {
         relatorioTableBody.innerHTML = `<tr><td colspan="100" class="text-center">Carregando dados...</td></tr>`;
 
         try {
-            // Ajuste o endpoint conforme sua API
             allDados = await fetchData('cargas-horarias');
-
-            // Obter lista única de cursos para montar colunas dinâmicas
             const setCursos = new Set();
             allDados.forEach(item => {
-                if (item.cursoId?.nome) setCursos.add(item.cursoId.nome); // Changed from disciplinaId
+                if (item.cursoId?.nome) setCursos.add(item.cursoId.nome);
             });
-            cursosUnicos = Array.from(setCursos).sort(); // Changed from disciplinasUnicas
+            cursosUnicos = Array.from(setCursos).sort();
 
             montarCabecalho();
             aplicarFiltros();
@@ -54,16 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function montarCabecalho() {
-        // Limpa colunas além das fixas (Professor, Total CH, Suficiência)
         while (tableHeaderRow.children.length > 3) {
             tableHeaderRow.removeChild(tableHeaderRow.children[3]);
         }
 
-        // Insere colunas de curso após "Professor" e antes de "Total CH"
-        cursosUnicos.forEach(curso => { // Changed from disciplinasUnicas
+        cursosUnicos.forEach(curso => {
             const th = document.createElement('th');
-            th.textContent = curso; // Changed from disciplina
-            tableHeaderRow.insertBefore(th, tableHeaderRow.children[1]); // inserir antes do Total CH (2ª coluna)
+            th.textContent = curso;
+            tableHeaderRow.insertBefore(th, tableHeaderRow.children[1]);
         });
     }
 
@@ -72,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const cargaMinima = parseFloat(cargaMinimaHorasInput.value) * 60;
         const cargaMaxima = parseFloat(cargaMaximaHorasInput.value) * 60;
 
-        // Agrupa dados por professor
         const profsMap = new Map();
 
         allDados.forEach(item => {
@@ -82,13 +79,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!profsMap.has(profId)) {
                 profsMap.set(profId, {
                     nome: profNome,
-                    cursos: {}, // Changed from disciplinas: {}
+                    cursos: {},
                     totalMinutos: 0,
                     atribuicoes: []
                 });
             }
 
-            // Cálculo corrigido do total minutos:
             const chSemanal = item.cargaHorariaSemanalAulasAtribuida || 0;
             const duracaoMin = item.duracaoAulaMinutosAtribuida || 0;
 
@@ -99,61 +95,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 totalMinutos = chSemanal * duracaoMin
             }
 
-            // Soma total e por curso
             const prof = profsMap.get(profId);
             prof.totalMinutos += totalMinutos;
 
-            const cursoNome = item.cursoId?.nome || 'N/A'; // Changed from disciplinaId
-            prof.cursos[cursoNome] = (prof.cursos[cursoNome] || 0) + totalMinutos; // Changed from disciplinas
+            const cursoNome = item.cursoId?.nome || 'N/A';
+            prof.cursos[cursoNome] = (prof.cursos[cursoNome] || 0) + totalMinutos;
             prof.atribuicoes.push(item);
         });
 
-        // Filtra por texto na busca (professor, disciplina, curso)
-        let profsFiltrados = Array.from(profsMap.values()).filter(prof => {
+        profsFiltradosParaExportacao = Array.from(profsMap.values()).filter(prof => {
             if (!filtroTexto) return true;
 
-            const cursosText = Object.keys(prof.cursos).join(' ').toLowerCase(); // Changed from disciplinasText
+            const cursosText = Object.keys(prof.cursos).join(' ').toLowerCase();
             const atribuicoesText = prof.atribuicoes.map(a =>
                 (a.professorId?.nome || '') + ' ' +
                 (a.disciplinaId?.nome || '') + ' ' +
                 (a.cursoId?.nome || '')).join(' ').toLowerCase();
 
             return prof.nome.toLowerCase().includes(filtroTexto)
-                || cursosText.includes(filtroTexto) // Changed from disciplinasText
+                || cursosText.includes(filtroTexto)
                 || atribuicoesText.includes(filtroTexto);
         });
 
-        preencherTabela(profsFiltrados, cargaMinima, cargaMaxima);
+        preencherTabela(profsFiltradosParaExportacao, cargaMinima, cargaMaxima);
     }
 
     function preencherTabela(profs, cargaMinima, cargaMaxima) {
         relatorioTableBody.innerHTML = '';
         if (profs.length === 0) {
-            relatorioTableBody.innerHTML = `<tr><td colspan="${3 + cursosUnicos.length}" class="text-center">Nenhum resultado encontrado.</td></tr>`; // Changed from disciplinasUnicas
+            relatorioTableBody.innerHTML = `<tr><td colspan="${3 + cursosUnicos.length}" class="text-center">Nenhum resultado encontrado.</td></tr>`;
             return;
         }
 
         profs.forEach(prof => {
             const tr = document.createElement('tr');
 
-            // Nome professor
             const tdNome = document.createElement('td');
             tdNome.textContent = prof.nome;
             tr.appendChild(tdNome);
 
-            // Colunas por curso
-            cursosUnicos.forEach(curso => { // Changed from disciplinasUnicas
-                const tdCurso = document.createElement('td'); // Changed from tdDisc
-                const minutos = prof.cursos[curso] || 0; // Changed from prof.disciplinas
-                tdCurso.textContent = formatMinutesToHoursMinutes(minutos); // Changed from tdDisc
-                tr.appendChild(tdCurso); // Changed from tdDisc
+            cursosUnicos.forEach(curso => {
+                const tdCurso = document.createElement('td');
+                const minutos = prof.cursos[curso] || 0;
+                tdCurso.textContent = formatMinutesToHoursMinutes(minutos);
+                tr.appendChild(tdCurso);
             });
 
-            // Total CH atribuída
             const tdTotal = document.createElement('td');
             tdTotal.textContent = formatMinutesToHoursMinutes(prof.totalMinutos);
 
-            // Suficiência e estilização conforme mínimo e máximo
             const tdSuf = document.createElement('td');
             let situacao = '';
             tdTotal.classList.remove('text-danger', 'text-success', 'text-warning');
@@ -176,12 +166,91 @@ document.addEventListener('DOMContentLoaded', () => {
 
             tr.appendChild(tdTotal);
             tr.appendChild(tdSuf);
-
             relatorioTableBody.appendChild(tr);
         });
     }
 
+    // Função para exportar os dados para um arquivo de planilha .xlsx
+    function exportarParaXLSX() {
+        if (profsFiltradosParaExportacao.length === 0) {
+            alert('Não há dados na tabela para exportar.');
+            return;
+        }
+
+        // Cria o cabeçalho da planilha
+        const header = ['Professor', ...cursosUnicos, 'Total CH', 'Suficiência'];
+
+        // Mapeia os dados dos professores para o formato da planilha
+        const dadosPlanilha = profsFiltradosParaExportacao.map(prof => {
+            const row = [prof.nome];
+            cursosUnicos.forEach(curso => {
+                row.push(formatMinutesToHoursMinutes(prof.cursos[curso] || 0));
+            });
+            row.push(formatMinutesToHoursMinutes(prof.totalMinutos));
+
+            const cargaMinima = parseFloat(cargaMinimaHorasInput.value) * 60;
+            const cargaMaxima = parseFloat(cargaMaximaHorasInput.value) * 60;
+            let situacao = '';
+            if (prof.totalMinutos < cargaMinima) {
+                situacao = 'Insuficiente';
+            } else if (prof.totalMinutos > cargaMaxima) {
+                situacao = 'Extrapolado';
+            } else {
+                situacao = 'Suficiente';
+            }
+            row.push(situacao);
+            return row;
+        });
+
+        // Converte os dados para o formato de planilha e baixa o arquivo
+        const worksheet = XLSX.utils.aoa_to_sheet([header, ...dadosPlanilha]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Carga Horária de Professores");
+        XLSX.writeFile(workbook, "relatorio_carga_horaria_professores.xlsx");
+    }
+
+    // Função para exportar os dados para um arquivo de planilha .ods
+    function exportarParaODS() {
+        if (profsFiltradosParaExportacao.length === 0) {
+            alert('Não há dados na tabela para exportar.');
+            return;
+        }
+        
+        // Cria o cabeçalho da planilha
+        const header = ['Professor', ...cursosUnicos, 'Total CH', 'Suficiência'];
+
+        // Mapeia os dados dos professores para o formato da planilha
+        const dadosPlanilha = profsFiltradosParaExportacao.map(prof => {
+            const row = [prof.nome];
+            cursosUnicos.forEach(curso => {
+                row.push(formatMinutesToHoursMinutes(prof.cursos[curso] || 0));
+            });
+            row.push(formatMinutesToHoursMinutes(prof.totalMinutos));
+
+            const cargaMinima = parseFloat(cargaMinimaHorasInput.value) * 60;
+            const cargaMaxima = parseFloat(cargaMaximaHorasInput.value) * 60;
+            let situacao = '';
+            if (prof.totalMinutos < cargaMinima) {
+                situacao = 'Insuficiente';
+            } else if (prof.totalMinutos > cargaMaxima) {
+                situacao = 'Extrapolado';
+            } else {
+                situacao = 'Suficiente';
+            }
+            row.push(situacao);
+            return row;
+        });
+
+        // Converte os dados para o formato de planilha e baixa o arquivo
+        const worksheet = XLSX.utils.aoa_to_sheet([header, ...dadosPlanilha]);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Carga Horária de Professores");
+        XLSX.writeFile(workbook, "relatorio_carga_horaria_professores.ods");
+    }
+
     // Eventos
+    btnExportarODP.addEventListener('click', exportarParaODS);
+    btnExportarXLS.addEventListener('click', exportarParaXLSX);
     btnGerarRelatorio.addEventListener('click', carregarDados);
     filtroGeralInput.addEventListener('input', aplicarFiltros);
     cargaMinimaHorasInput.addEventListener('input', aplicarFiltros);
@@ -189,17 +258,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Carregar dados inicial
     carregarDados();
-
-    // Exportar PDF
-    btnExportarPdf.addEventListener('click', () => {
-        const element = document.getElementById('relatorioTable');
-        const opt = {
-            margin: 0.5,
-            filename: 'relatorio_carga_horaria_docente.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-        };
-        html2pdf().set(opt).from(element).save();
-    });
 });

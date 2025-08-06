@@ -35,10 +35,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const titulacaoMaxima = document.getElementById('titulacaoMaxima');
     const cursoLotacao = document.getElementById('cursoLotacao');
     const professoresTableBody = document.querySelector('#formCadastroProfessor + h3 + .table-responsive tbody');
-    const btnSalvarProfessor = document.getElementById('btnSalvarProfessor'); // Novo: Botão de salvar
-    const btnCancelarEdicaoProfessor = document.getElementById('btnCancelarEdicaoProfessor'); // Novo: Botão de cancelar edição
-
-    let editingId = null; // Variável para armazenar o ID do professor em edição
+    const btnSalvarProfessor = document.getElementById('btnSalvarProfessor');
+    const btnCancelarEdicaoProfessor = document.getElementById('btnCancelarEdicaoProfessor');
+    
+    const btnExportarXLS = document.getElementById('btnExportarXLS');
+    const btnExportarODP = document.getElementById('btnExportarODP');
+    
+    let editingId = null;
+    let allProfessores = [];
 
     // Função para popular o dropdown de cursos de lotação
     async function populateCursosLotacao() {
@@ -61,7 +65,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadProfessores() {
         try {
             const professores = await fetchData('professores');
-            professoresTableBody.innerHTML = ''; // Limpa a tabela
+            allProfessores = professores;
+            professoresTableBody.innerHTML = '';
             if (professores && professores.length > 0) {
                 professores.forEach(professor => {
                     const row = professoresTableBody.insertRow();
@@ -84,13 +89,56 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Funções para exportação
+    function exportarParaXLSX() {
+        if (allProfessores.length === 0) {
+            alert('Não há dados de professores para exportar.');
+            return;
+        }
+
+        const dataForExport = allProfessores.map(professor => ({
+            'Nome': professor.nome,
+            'SIAPE': professor.siape,
+            'Email': professor.emailInstitucional,
+            'Telefone': professor.telefone || 'N/A',
+            'Titulação': professor.titulacaoMaxima,
+            'Curso de Lotação': professor.cursoLotacaoId?.nome || 'N/A'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Professores Cadastrados");
+        XLSX.writeFile(workbook, "professores_cadastrados.xlsx");
+    }
+
+    function exportarParaODS() {
+        if (allProfessores.length === 0) {
+            alert('Não há dados de professores para exportar.');
+            return;
+        }
+
+        const dataForExport = allProfessores.map(professor => ({
+            'Nome': professor.nome,
+            'SIAPE': professor.siape,
+            'Email': professor.emailInstitucional,
+            'Telefone': professor.telefone || 'N/A',
+            'Titulação': professor.titulacaoMaxima,
+            'Curso de Lotação': professor.cursoLotacaoId?.nome || 'N/A'
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Professores Cadastrados");
+        XLSX.writeFile(workbook, "professores_cadastrados.ods");
+    }
+
     // Função para resetar o formulário
     function resetForm() {
         formCadastroProfessor.reset();
         editingId = null;
         btnSalvarProfessor.innerHTML = '<i class="fas fa-save me-2"></i> Cadastrar Professor';
-        btnSalvarProfessor.classList.remove('btn-success');
-        btnSalvarProfessor.classList.add('btn-success'); // Volta para a cor padrão de cadastro
+        btnSalvarProfessor.classList.remove('btn-primary');
+        btnSalvarProfessor.classList.add('btn-success');
         btnCancelarEdicaoProfessor.classList.add('d-none');
     }
 
@@ -107,15 +155,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            if (editingId) { // Lógica para editar
+            if (editingId) {
                 await fetchData(`professores/${editingId}`, 'PATCH', professorData);
                 alert('Professor atualizado com sucesso!');
-            } else { // Lógica para adicionar
+            } else {
                 await fetchData('professores', 'POST', professorData);
                 alert('Professor cadastrado com sucesso!');
             }
-            resetForm(); // Reseta o formulário após a operação
-            loadProfessores(); // Recarrega a tabela
+            resetForm();
+            loadProfessores();
         } catch (error) {
             console.error('Erro ao salvar professor:', error);
             alert(`Erro ao salvar professor: ${error.message}`);
@@ -129,15 +177,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             nomeProfessor.value = professor.nome;
             siapeProfessor.value = professor.siape;
             emailInstitucionalProfessor.value = professor.emailInstitucional;
-            telefoneProfessor.value = professor.telefone || ''; // Garante que não seja 'null' se vazio
+            telefoneProfessor.value = professor.telefone || '';
             titulacaoMaxima.value = professor.titulacaoMaxima;
             cursoLotacao.value = professor.cursoLotacaoId ? professor.cursoLotacaoId._id : '';
             
-            editingId = professor._id; // Armazena o ID para atualização
+            editingId = professor._id;
             btnSalvarProfessor.innerHTML = '<i class="fas fa-save me-2"></i> Atualizar Professor';
             btnSalvarProfessor.classList.remove('btn-success');
-            btnSalvarProfessor.classList.add('btn-primary'); // Mude a cor para indicar modo de edição
-            btnCancelarEdicaoProfessor.classList.remove('d-none'); // Mostra o botão cancelar
+            btnSalvarProfessor.classList.add('btn-primary');
+            btnCancelarEdicaoProfessor.classList.remove('d-none');
         } catch (error) {
             console.error('Erro ao carregar professor para edição:', error);
             alert(`Erro ao carregar professor para edição: ${error.message}`);
@@ -157,7 +205,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    btnCancelarEdicaoProfessor.addEventListener('click', resetForm); // Listener para cancelar edição
+    btnCancelarEdicaoProfessor.addEventListener('click', resetForm);
+    
+    // Event listeners para os botões de exportação
+    btnExportarXLS.addEventListener('click', exportarParaXLSX);
+    btnExportarODP.addEventListener('click', exportarParaODS);
 
     // Carregar dados iniciais
     await populateCursosLotacao();

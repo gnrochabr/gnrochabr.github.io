@@ -39,8 +39,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const totalCHHorasSpan = document.getElementById('totalCHHoras');
     const submitButton = formAtribuirCargaHoraria.querySelector('button[type="submit"]');
 
+    const btnExportarXLS = document.getElementById('btnExportarXLS');
+    const btnExportarODP = document.getElementById('btnExportarODP');
+    
     let allCargasHorarias = [];
-    let allTurmas = [];  // Guardar todas as turmas para filtro
+    let allTurmas = [];
+    let allDisciplinas = [];
 
     const showMessage = (message, type = 'info') => {
         const alertPlaceholder = document.getElementById('liveAlertPlaceholder') || (() => {
@@ -55,8 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const wrapper = document.createElement('div');
         wrapper.innerHTML = [
             `<div class="alert alert-${type} alert-dismissible fade show" role="alert">`,
-            `   <div>${message}</div>`,
-            '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+            `  <div>${message}</div>`,
+            '  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
             '</div>'
         ].join('');
 
@@ -78,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             items.forEach(item => {
                 const option = document.createElement('option');
-                const value = item[valueKey]?.$oid || item[valueKey];
+                const value = item[valueKey];
                 const text = item[textKey];
                 option.value = value;
                 option.textContent = text;
@@ -115,7 +119,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Popula turmas filtradas pelo curso selecionado
     function populateTurmasByCurso(cursoId) {
         const turmasFiltradas = allTurmas.filter(turma => {
             if (!turma.cursoId) return false;
@@ -140,9 +143,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         await populatePeriodoLetivoFromTurmas();
         await populateDropdown(professorSelect, 'professores', 'Selecione o professor', 'nome');
         await populateDropdown(cursoSelect, 'cursos', 'Selecione o curso', 'nome');
-        await populateDropdown(disciplinaSelect, 'disciplinas', 'Selecione a disciplina', 'nome');
+        allDisciplinas = await populateDropdown(disciplinaSelect, 'disciplinas', 'Selecione a disciplina', 'nome');
 
-        // Busca todas as turmas mas NÃO popula o select diretamente
         allTurmas = await fetchData('turmas');
         turmaSelect.innerHTML = `<option selected disabled value="">Selecione o curso primeiro</option>`;
     }
@@ -173,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const renderCargasHorariasTable = () => {
         cargasHorariasTableBody.innerHTML = '';
 
-        const safeGetNome = obj => obj && typeof obj === 'object' && obj.nome ? obj.nome: '';
+        const safeGetNome = obj => obj && typeof obj === 'object' && obj.nome ? obj.nome : '';
 
         const sortedCargas = [...allCargasHorarias].sort((a, b) => {
             return safeGetNome(a.professorId).localeCompare(safeGetNome(b.professorId));
@@ -227,7 +229,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Atualiza turmas quando o curso mudar
+    // Funções para exportação
+    function exportarParaXLSX() {
+        if (allCargasHorarias.length === 0) {
+            alert('Não há dados de cargas horárias para exportar.');
+            return;
+        }
+
+        const dataForExport = allCargasHorarias.map(carga => ({
+            Professor: carga.professorId?.nome || 'N/A',
+            Disciplina: carga.disciplinaId?.nome || 'N/A',
+            Turma: carga.turmaId?.nome || 'N/A',
+            Curso: carga.cursoId?.nome || 'N/A',
+            'Período Letivo': carga.periodoLetivoAtribuicao || 'N/A',
+            'CH Semanal (Aulas)': carga.cargaHorariaSemanalAulasAtribuida,
+            'Duração da Aula (Min)': carga.duracaoAulaMinutosAtribuida,
+            'CH Semanal (Calculada)': formatMinutesToHoursMinutes(carga.cargaHorariaSemanalMinutosCalculada)
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Cargas Horárias");
+        XLSX.writeFile(workbook, "cargas_horarias.xlsx");
+    }
+
+    function exportarParaODS() {
+        if (allCargasHorarias.length === 0) {
+            alert('Não há dados de cargas horárias para exportar.');
+            return;
+        }
+
+        const dataForExport = allCargasHorarias.map(carga => ({
+            Professor: carga.professorId?.nome || 'N/A',
+            Disciplina: carga.disciplinaId?.nome || 'N/A',
+            Turma: carga.turmaId?.nome || 'N/A',
+            Curso: carga.cursoId?.nome || 'N/A',
+            'Período Letivo': carga.periodoLetivoAtribuicao || 'N/A',
+            'CH Semanal (Aulas)': carga.cargaHorariaSemanalAulasAtribuida,
+            'Duração da Aula (Min)': carga.duracaoAulaMinutosAtribuida,
+            'CH Semanal (Calculada)': formatMinutesToHoursMinutes(carga.cargaHorariaSemanalMinutosCalculada)
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Cargas Horárias");
+        XLSX.writeFile(workbook, "cargas_horarias.ods");
+    }
+
     cursoSelect.addEventListener('change', () => {
         const selectedCursoId = cursoSelect.value;
         if (selectedCursoId) {
@@ -242,9 +290,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     formAtribuirCargaHoraria.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const disciplinaSelecionada = allDisciplinas.find(d => d._id === disciplinaSelect.value);
+
+        if (!disciplinaSelecionada) {
+            showMessage('Disciplina não encontrada. Tente recarregar a página.', 'danger');
+            return;
+        }
+
         const cargaData = {
             professorId: professorSelect.value,
             disciplinaId: disciplinaSelect.value,
+            disciplinaArea: disciplinaSelecionada.areaDisciplina,
             turmaId: turmaSelect.value,
             cursoId: cursoSelect.value,
             periodoLetivoAtribuicao: periodoLetivoSelect.value,
@@ -288,9 +344,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             periodoLetivoSelect.value = cargaToEdit.periodoLetivoAtribuicao;
             professorSelect.value = cargaToEdit.professorId?._id || '';
             cursoSelect.value = cargaToEdit.cursoId?._id || '';
-            
-            // Atualiza turmas para o curso da carga e seleciona a turma correta
-            if(cursoSelect.value) {
+
+            if (cursoSelect.value) {
                 populateTurmasByCurso(cursoSelect.value);
             }
             turmaSelect.value = cargaToEdit.turmaId?._id || '';
@@ -345,7 +400,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // Event listeners para os botões de exportação
+    btnExportarXLS.addEventListener('click', exportarParaXLSX);
+    btnExportarODP.addEventListener('click', exportarParaODS);
+
     await loadAllDropdowns();
     await loadAllCargasHorarias();
 });
-

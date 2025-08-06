@@ -3,21 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório Docente - CH Docente</title>
+    <title>Relatório Geral de Carga Horária Docente</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
-    
     <style>
         #pdfContainer {
-            padding: 10px;
+            padding: 0;
             background-color: white;
         }
         #pdfContainer table {
-            font-size: 16px;
+            font-size: 14px;
+            width: 100%;
+            table-layout: fixed;
         }
-
-        /* Estilo para botões de tamanho fixo com texto e ícone */
+        /* Ajuste de largura das colunas */
+        #relatorioTable th:nth-child(1),
+        #relatorioTable td:nth-child(1) { width: 20%; } /* Professor */
+        #relatorioTable th:nth-child(2),
+        #relatorioTable td:nth-child(2) { width: 25%; } /* Disciplinas (aproximadamente o dobro) */
+        #relatorioTable th:nth-child(3),
+        #relatorioTable td:nth-child(3) { width: 15%; } /* Áreas */
+        #relatorioTable th:nth-child(4),
+        #relatorioTable td:nth-child(4) { width: 25%; } /* Cursos */
+        #relatorioTable th:nth-child(5),
+        #relatorioTable td:nth-child(5) { width: 15%; } /* Carga Horária Total */
+        
         .btn-full {
             min-width: 120px;
         }
@@ -33,8 +44,6 @@
         .btn-fixed-icon .fas {
             margin: 0 !important;
         }
-        
-        /* Media Query para telas pequenas: esconde o texto dos botões de exportação */
         @media (max-width: 767px) {
             .btn-export-text {
                 display: none;
@@ -44,8 +53,6 @@
                 padding: 0;
             }
         }
-
-        
     </style>
 </head>
 <body class="bg-light">
@@ -53,63 +60,48 @@
         <a href="../index.html" class="btn btn-secondary mb-4 btn-custom-back">
             <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
         </a>
-        <h2 class="mb-4 text-success"><i class="fas fa-file-alt me-2"></i> Relatório de Carga Horária Docente</h2>
-        <p class="lead text-muted mb-4">Visualize a carga horária total atribuída a cada professor por curso e verifique a suficiência.</p>
+        <h2 class="mb-4 text-success"><i class="fas fa-file-alt me-2"></i> Relatório Geral de Carga Horária Docente</h2>
+        <p class="lead text-muted mb-4">Visualize a carga horária de todos os professores, suas disciplinas, áreas e cursos.</p>
     </header>
 
     <main class="container">
         <section class="card shadow-sm p-4 mb-4">
             <h3 class="card-title text-secondary mb-3">Filtros e Ações</h3>
-            <div class="row g-3">
+            <div class="row g-3 align-items-end">
                 <div class="col-md-6">
-                    <label for="filtroGeral" class="form-label">Buscar por Professor, Disciplina ou Curso:</label>
+                    <label for="filtroGeral" class="form-label">Filtrar por Professor, Disciplina, Área ou Curso:</label>
                     <div class="d-flex gap-2">
                         <input type="text" class="form-control" id="filtroGeral" placeholder="Digite para filtrar...">
-                        <button id="btnGerarRelatorio" class="btn btn-primary"><i class="fas fa-search me-2"></i></button>
+                        <button id="btnGerarRelatorio" class="btn btn-primary btn-full"><i class="fas fa-sync-alt me-2"></i> Atualizar</button>
                     </div>
                 </div>
                 
-                <div class="col-md-6 d-flex flex-column">
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <label for="cargaMinimaHoras" class="form-label">Carga Horária Mínima (horas):</label>
-                            <input type="number" class="form-control" id="cargaMinimaHoras" value="10" min="0" required>
-                        </div>
-                        <div class="col-6">
-                            <label for="cargaMaximaHoras" class="form-label">Carga Horária Máxima (horas):</label>
-                            <input type="number" class="form-control" id="cargaMaximaHoras" value="20" min="0" required>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <hr>
-            
-            <div class="d-flex justify-content-end align-items-center mt-3 gap-2">
-                <div class="d-flex flex-column align-items-end gap-2">
+                <div class="col-md-6 d-flex flex-column align-items-md-end">
                     <label class="form-label" for="exportButtons">Exportar para:</label>
                     <div class="d-flex gap-2" id="exportButtons">
                         <button id="btnExportarXLS" class="btn btn-success btn-sm btn-export"><i class="fas fa-file-excel"></i> <span class="btn-export-text">XLS</span></button>
-                        <button id="btnExportarODP" class="btn btn-info text-white btn-sm btn-export"><i class="fas fa-file-alt"></i> <span class="btn-export-text">ODS</span></button>
+                        <button id="btnExportarODS" class="btn btn-info text-white btn-sm btn-export"><i class="fas fa-file-alt"></i> <span class="btn-export-text">ODS</span></button>
                     </div>
                 </div>
             </div>
         </section>
 
         <section class="card shadow-sm p-4">
-            <h3 class="card-title text-secondary mb-3">Carga Horária por Professor e Curso</h3>
+            <h3 class="card-title text-secondary mb-3">Detalhes por Professor</h3>
             <div id="pdfContainer">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover" id="relatorioTable">
                         <thead>
                             <tr id="tableHeaderRow">
                                 <th>Professor</th>
-                                <th>Total CH</th>
-                                <th>Suficiência</th>
+                                <th>Disciplinas</th>
+                                <th>Áreas</th>
+                                <th>Cursos</th>
+                                <th>Carga Horária Total</th>
                             </tr>
                         </thead>
                         <tbody id="relatorioTableBody">
-                            <tr><td colspan="3" class="text-center">Carregando dados...</td></tr>
+                            <tr><td colspan="5" class="text-center">Carregando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -119,8 +111,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="../js/utils.js"></script>
-    <script src="../js/relatorioDocente.js"></script>
+    <script src="../js/relatorioGeral.js"></script>
 </body>
 </html>

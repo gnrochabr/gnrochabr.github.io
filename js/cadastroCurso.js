@@ -38,6 +38,10 @@ const tabela = document.querySelector('tbody');
 const btnSubmit = form.querySelector('button[type="submit"]');
 const btnCancelar = document.getElementById('cancelarEdicao');
 
+const btnExportarXLS = document.getElementById('btnExportarXLS');
+const btnExportarODP = document.getElementById('btnExportarODP');
+let allCursos = [];
+
 window.editCurso = async (id) => {
     try {
         const curso = await fetchData(`cursos/${id}`);
@@ -68,27 +72,56 @@ window.deleteCurso = async (id) => {
 async function loadCursos() {
     try {
         const cursos = await fetchData('cursos');
+        allCursos = cursos;
         tabela.innerHTML = '';
-        cursos.forEach(curso => {
-            const row = tabela.insertRow();
-            row.innerHTML = `
-                <td>${curso.nome}</td>
-                <td>${curso.codigo}</td>
-                <td>${curso.modalidade}</td>
-                <td>${curso.grau}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editCurso('${curso._id}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteCurso('${curso._id}')">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </td>
-            `;
-        });
+        if (cursos && cursos.length > 0) {
+            cursos.forEach(curso => {
+                const row = tabela.insertRow();
+                row.innerHTML = `
+                    <td>${curso.nome}</td>
+                    <td>${curso.codigo}</td>
+                    <td>${curso.modalidade}</td>
+                    <td>${curso.grau}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editCurso('${curso._id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCurso('${curso._id}')">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+            });
+        } else {
+            tabela.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum curso cadastrado.</td></tr>';
+        }
     } catch (error) {
         console.error('Erro ao carregar cursos:', error);
+        tabela.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar cursos.</td></tr>';
     }
+}
+
+// Funções para exportação
+function exportarParaXLSX() {
+    if (allCursos.length === 0) {
+        alert('Não há dados de cursos para exportar.');
+        return;
+    }
+    const worksheet = XLSX.utils.json_to_sheet(allCursos);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Cursos Cadastrados");
+    XLSX.writeFile(workbook, "cursos_cadastrados.xlsx");
+}
+
+function exportarParaODS() {
+    if (allCursos.length === 0) {
+        alert('Não há dados de cursos para exportar.');
+        return;
+    }
+    const worksheet = XLSX.utils.json_to_sheet(allCursos);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Cursos Cadastrados");
+    XLSX.writeFile(workbook, "cursos_cadastrados.ods");
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -126,6 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSubmit.textContent = 'Cadastrar Curso';
         btnCancelar.style.display = 'none';
     });
+
+    // Event listeners para os botões de exportação
+    btnExportarXLS.addEventListener('click', exportarParaXLSX);
+    btnExportarODP.addEventListener('click', exportarParaODS);
 
     loadCursos();
 });

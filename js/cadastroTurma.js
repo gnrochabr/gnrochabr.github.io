@@ -28,8 +28,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const turmasTableBody = document.querySelector('.table-responsive tbody');
     const btnSalvarTurma = document.getElementById('btnSalvarTurma');
     const btnCancelarEdicaoTurma = document.getElementById('btnCancelarEdicaoTurma');
+    
+    const btnExportarXLS = document.getElementById('btnExportarXLS');
+    const btnExportarODP = document.getElementById('btnExportarODP');
 
     let allCursos = [];
+    let allTurmas = [];
     let editingId = null;
 
     function gerarNomeTurma() {
@@ -74,6 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadTurmas() {
         try {
             const turmas = await fetchData('turmas');
+            allTurmas = turmas;
             turmasTableBody.innerHTML = '';
 
             if (!turmas.length) {
@@ -85,7 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const row = turmasTableBody.insertRow();
                 row.insertCell().textContent = turma.nome;
                 row.insertCell().textContent = turma.cursoId?.nome || 'N/A';
-                row.insertCell().textContent = turma.modalidade; // corrigido aqui
+                row.insertCell().textContent = turma.modalidade;
                 row.insertCell().textContent = turma.periodoLetivo;
                 row.insertCell().textContent = turma.turno;
                 const actionsCell = row.insertCell();
@@ -115,13 +120,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnCancelarEdicaoTurma.classList.add('d-none');
     }
 
+    // Funções para exportação
+    function exportarParaXLSX() {
+        if (allTurmas.length === 0) {
+            alert('Não há dados de turmas para exportar.');
+            return;
+        }
+
+        const dataForExport = allTurmas.map(turma => ({
+            'Nome da Turma': turma.nome,
+            'Curso': turma.cursoId?.nome || 'N/A',
+            'Modalidade': turma.modalidade,
+            'Período Letivo': turma.periodoLetivo,
+            'Turno': turma.turno
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Turmas Cadastradas");
+        XLSX.writeFile(workbook, "turmas_cadastradas.xlsx");
+    }
+
+    function exportarParaODS() {
+        if (allTurmas.length === 0) {
+            alert('Não há dados de turmas para exportar.');
+            return;
+        }
+
+        const dataForExport = allTurmas.map(turma => ({
+            'Nome da Turma': turma.nome,
+            'Curso': turma.cursoId?.nome || 'N/A',
+            'Modalidade': turma.modalidade,
+            'Período Letivo': turma.periodoLetivo,
+            'Turno': turma.turno
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Turmas Cadastradas");
+        XLSX.writeFile(workbook, "turmas_cadastradas.ods");
+    }
+    
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const turmaData = {
             nome: nomeTurmaInput.value.trim(),
             cursoId: cursoTurmaSelect.value,
-            modalidade: modalidadeTurmaSelect.value, // corrigido aqui
+            modalidade: modalidadeTurmaSelect.value,
             periodoLetivo: periodoLetivoTurmaInput.value.trim(),
             turno: turnoTurmaSelect.value,
         };
@@ -146,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const turma = await fetchData(`turmas/${id}`);
             cursoTurmaSelect.value = turma.cursoId?._id || turma.cursoId || '';
-            modalidadeTurmaSelect.value = turma.modalidade; // corrigido aqui
+            modalidadeTurmaSelect.value = turma.modalidade;
             periodoLetivoTurmaInput.value = turma.periodoLetivo;
             turnoTurmaSelect.value = turma.turno;
             nomeTurmaInput.value = turma.nome;
@@ -181,6 +227,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     turnoTurmaSelect.addEventListener('change', gerarNomeTurma);
 
     btnCancelarEdicaoTurma.addEventListener('click', resetForm);
+
+    // Event listeners para os botões de exportação
+    btnExportarXLS.addEventListener('click', exportarParaXLSX);
+    btnExportarODP.addEventListener('click', exportarParaODS);
 
     await populateCursos();
     await loadTurmas();
