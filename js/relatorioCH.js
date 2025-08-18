@@ -5,7 +5,7 @@
  */
 document.addEventListener("DOMContentLoaded", () => {
   // 1. CONSTANTES, VARIÁVEIS DE ESTADO E CONFIGURAÇÕES
-  const API_BASE_URL = "http://localhost:3000/api";
+  const API_BASE_URL = "https://serversgch-nv.onrender.com";
   const DOM = {
     tableHead: document.getElementById("geralTableHead"),
     tableBody: document.getElementById("geralTableBody"),
