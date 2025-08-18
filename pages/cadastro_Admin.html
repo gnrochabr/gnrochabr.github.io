@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cadastro de Administrador</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      background-color: #f0f2f5;
+      font-family: 'Poppins', sans-serif;
+    }
+    .cadastro-container {
+      max-width: 500px;
+      margin: 4rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .alert {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cadastro-container">
+    <h2 class="mb-4 text-center">Cadastro de Administrador</h2>
+
+    <form id="formCadastro">
+      <div class="mb-3">
+        <label for="nome" class="form-label">Nome completo</label>
+        <input type="text" class="form-control" id="nome" name="nome" required />
+      </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">E-mail institucional</label>
+        <input type="email" class="form-control" id="email" name="email" required />
+      </div>
+      <div class="mb-3">
+        <label for="senha" class="form-label">Senha</label>
+        <input type="password" class="form-control" id="senha" name="senha" required />
+      </div>
+      <div class="mb-3">
+        <label for="confirmarSenha" class="form-label">Confirmar senha</label>
+        <input
+          type="password"
+          class="form-control"
+          id="confirmarSenha"
+          name="confirmarSenha"
+          required
+        />
+      </div>
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-success">Cadastrar</button>
+      </div>
+    </form>
+
+    <div id="mensagem" class="alert d-none" role="alert"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('formCadastro');
+    const mensagem = document.getElementById('mensagem');
+    const botao = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // limpar mensagens antigas e classes
+      mensagem.classList.add('d-none');
+      mensagem.classList.remove('alert-success', 'alert-danger', 'alert-warning');
+      mensagem.textContent = '';
+
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+      const confirmarSenha = document.getElementById('confirmarSenha').value;
+
+      // Validações básicas
+      if (!nome || !email || !senha || !confirmarSenha) {
+        mensagem.classList.remove('d-none');
+        mensagem.classList.add('alert', 'alert-warning');
+        mensagem.textContent = 'Preencha todos os campos.';
+        return;
+      }
+
+      if (senha !== confirmarSenha) {
+        mensagem.classList.remove('d-none');
+        mensagem.classList.add('alert', 'alert-warning');
+        mensagem.textContent = 'As senhas não coincidem.';
+        return;
+      }
+
+      try {
+        botao.disabled = true;
+        botao.textContent = 'Cadastrando...';
+
+        const resposta = await fetch('http://localhost:3000/api/admins/cadastrar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ nome, email, senha }),
+        });
+
+        const data = await resposta.json();
+
+        if (resposta.ok) {
+          mensagem.classList.remove('d-none');
+          mensagem.classList.add('alert', 'alert-success');
+          mensagem.textContent = data.mensagem || 'Administrador cadastrado com sucesso!';
+          form.reset();
+
+          // Redirecionar após 2 segundos (opcional)
+          setTimeout(() => {
+            window.location.href = 'login.html'; // Mude para sua página de login
+          }, 2000);
+        } else {
+          mensagem.classList.remove('d-none');
+          mensagem.classList.add('alert', 'alert-danger');
+          mensagem.textContent = data.erro || 'Erro ao cadastrar administrador.';
+        }
+      } catch (erro) {
+        mensagem.classList.remove('d-none');
+        mensagem.classList.add('alert', 'alert-danger');
+        mensagem.textContent = 'Erro ao conectar com o servidor.';
+      } finally {
+        botao.disabled = false;
+        botao.textContent = 'Cadastrar';
+      }
+    });
+  </script>
+
+</body>
+</html>

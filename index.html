@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Carga Horária Docente</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <!-- Fonte -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Estilos internos -->
+  <style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Cabeçalho */
+    .header {
+        background-color: #2f9e41;
+        color: white;
+        margin-bottom: 1rem;
+        padding: 0.25rem 0;
+        border-bottom: 5px solid #cd191e;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+    }
+    .header img {
+        max-height: 4rem;
+    }
+    .header h1 {
+        font-weight: 600;
+        font-size: clamp(1rem, 2vw, 1.5rem);
+    }
+    .header p {
+        font-size: clamp(0.8rem, 1.2vw, 1rem);
+    }
+    /* Título das seções */
+    .section-title {
+        font-weight: 600;
+        color: #343a40;
+        margin-top: 0.3rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #2f9e41;
+        display: inline-block;
+        font-size: clamp(1rem, 1.5vw, 1.25rem);
+    }
+
+    /* Cards */
+    .custom-card-link {
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        border: none !important;
+        border-radius: 0.5rem;
+        background-color: #fff !important;
+        color: #333 !important;
+        text-decoration: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        padding: 1rem !important;
+        font-size: clamp(0.9rem, 1vw, 1rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .custom-card-link:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        background: linear-gradient(135deg, #2f9e41 0%, #35bd47 100%) !important;
+        color: #fff !important;
+    }
+    .custom-card-link h5 {
+        font-weight: 600;
+        color: #2f9e41;
+        font-size: clamp(1rem, 1.2vw, 1.2rem);
+        margin-top: 0.5rem;
+    }
+    .custom-card-link p {
+        color: #6c757d;
+        font-size: clamp(0.85rem, 1vw, 1rem);
+        margin-bottom: 0;
+    }
+    .card-icon {
+        color: #2f9e41;
+        margin-bottom: 0.5rem;
+        font-size: 2rem;
+    }
+    .section-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem; /* reduz espaço entre cards */
+  justify-content: space-between;
+}
+
+.section-cards .custom-card-link {
+  flex: 1 1 22%;      /* 4 cards por linha em telas grandes */
+  min-width: 220px;   /* evita ficar pequeno demais */
+  padding: 0.75rem !important; /* otimiza espaço interno */
+}
+
+    .custom-card-link:hover .card-icon,
+    .custom-card-link:hover h5,
+    .custom-card-link:hover p {
+        color: #fff !important;
+    }
+
+    @media (max-width: 576px) {
+        .card-icon { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Cabeçalho -->
+  <header class="header">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap">
+      <div class="d-flex align-items-center mb-2 mb-md-0">
+        <!-- Logo -->
+        <img src="img/nova-venecia-horizontal-branco.png" alt="Logo IFES" class="img-fluid me-3" onerror="this.style.display='none';" />
+        <div>
+          <h1 class="h2 mb-0">Dashboard de Carga Horária</h1>
+          <p class="lead text-white-50 mb-0">Sistema de Gerenciamento e Ajuste de Carga Horária Docente.</p>
+        </div>
+      </div>
+<div class="d-flex align-items-end justify-content-end">
+  Olá,&nbsp;<span id="adminName" class="text-white fw-bold me-2"></span>
+  <button id="btnLogout" class="btn btn-sm btn-light">Sair</button>
+</div>
+
+
+    </div>
+  </header>
+<!---->
+  <!-- Conteúdo -->
+  <main class="container my-3">
+
+    <!-- Cadastros Essenciais -->
+    <section class="mb-3">
+      <h2 class="section-title">Cadastros Essenciais</h2>
+      <div class="section-cards">
+        <div class="col"><a href="pages/cadastro_curso.html" class="card custom-card-link text-center"><i class="fa-solid fa-book-open card-icon"></i><h5>Cadastrar Curso</h5><p>Gerencie os cursos cadastrados na Instituição.</p></a></div>
+        <div class="col"><a href="pages/cadastro_disciplina.html" class="card custom-card-link text-center"><i class="fa-solid fa-book-reader card-icon"></i><h5>Cadastrar Disciplina</h5><p>Gerencie as disciplinas cadastradas na Instituição.</p></a></div>
+        <div class="col"><a href="pages/cadastro_professor.html" class="card custom-card-link text-center"><i class="fa-solid fa-user-plus card-icon"></i><h5>Cadastrar Professor</h5><p>Gerencie os docentes cadastrados na Instituição.</p></a></div>
+        <div class="col"><a href="pages/cadastro_turma.html" class="card custom-card-link text-center"><i class="fa-solid fa-users card-icon"></i><h5>Cadastrar Turma</h5><p>Gerencie as turmas cadastradas da Instituição.</p></a></div>
+      </div>
+    </section>
+
+    <!-- Processos Principais -->
+    <section class="mb-3">
+      <h2 class="section-title">Processos Principais</h2>
+      <div class="section-cards">
+        <div class="col"><a href="pages/cadastro_grade.html" class="card custom-card-link text-center"><i class="fa-solid fa-clipboard-list card-icon"></i><h5>Montar Grade</h5><p>Gerencie as grades curriculares da Instituição.</p></a></div>
+        <div class="col"><a href="pages/cadastro_atribuicao_CH.html" class="card custom-card-link text-center"><i class="fa-solid fa-graduation-cap card-icon"></i><h5>Atribuir Carga Horária</h5><p>Gerencie a Carga Horária das turmas da Instituição.</p></a></div>
+      </div>
+    </section>
+
+    <!-- Relatórios -->
+    <section class ="mb-3">
+      <h2 class="section-title">Análises e Relatórios</h2>
+      <div class="section-cards">
+        <div class="col"><a href="pages/relatorio_previsao_grade.html" class="card custom-card-link text-center"><i class="fa-solid fa-diagram-project card-icon"></i><h5>Previsão de CH por Área</h5><p>Analise a carga horária de uma grade.</p></a></div>
+        <div class="col"><a href="pages/relatorio_ch_docente.html" class="card custom-card-link text-center"><i class="fa-solid fa-sitemap card-icon"></i><h5>Relatório de CH Docente</h5><p>Consulte a carga horária por professor.</p></a></div>
+        <div class="col"><a href="pages/relatorio_geral.html" class="card custom-card-link text-center"><i class="fa-solid fa-globe-americas card-icon"></i><h5>Relatório Geral de Atribuições</h5><p>Visualize todas as atribuições do sistema.</p></a></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Script -->
+  <script>
+    async function carregarAdmin() {
+      try {
+        const resposta = await fetch('http://localhost:3000/api/auth/me', { credentials: 'include' });
+        if (resposta.ok) {
+          const data = await resposta.json();
+          document.getElementById('adminName').textContent = data.nome;
+        } else {
+          window.location.href = '/pages/login.html';
+        }
+      } catch (error) {
+        console.error('Erro ao carregar admin:', error);
+        window.location.href = '/pages/login.html';
+      }
+    }
+
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      try {
+        await fetch('http://localhost:3000/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include'
+        });
+        window.location.href = '/pages/login.html';
+      } catch (err) {
+        alert('Erro ao fazer logout.');
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', carregarAdmin);
+  </script>
+
+</body>
+</html>

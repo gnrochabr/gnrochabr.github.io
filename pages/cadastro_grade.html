@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Grade - CH Docente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <a href="../index.html" class="btn btn-secondary mb-4">
+            <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+        </a>
+
+        <div class="form-section">
+            <h2 class="mb-4 text-sucess"><i class="fas fa-calendar-alt me-2"></i> Cadastro de Grade Curricular</h2>
+            <p class="text-muted mb-4">Crie ou gerencie uma versão de uma grade semestral para um curso.</p>
+            
+            <div id="liveAlertPlaceholder" class="mb-3"></div>
+
+            <form id="formSelecaoGrade">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="cursoGH" class="form-label">Curso:</label>
+                        <select class="form-select" id="cursoGH" required></select>
+                    </div>
+                      <div class="col-md-6">
+                        <label for="TurmaGH" class="form-label">Turma:</label>
+                        <select class="form-select" id="TurmaGH" required disabled>
+                            <option selected disabled value="">Primeiro, selecione um curso</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="periodoLetivoGH" class="form-label">Período Letivo:</label>
+                        <select class="form-select" id="periodoLetivoGH" required>
+                            <option selected disabled value="">Selecione...</option>
+                            <option value="1º Semestre">1º Semestre</option>
+                            <option value="2º Semestre">2º Semestre</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="anoHomologacaoGH" class="form-label">Ano de Homologação:</label>
+                        <input type="number" class="form-control" id="anoHomologacaoGH" required placeholder="Ex: 2025">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="versaoGH" class="form-label">Versão:</label>
+                        <input type="number" class="form-control" id="versaoGH" value="1" min="1" required>
+                    </div>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search me-2"></i> Buscar / Criar Grade</button>
+                </div>
+            </form>
+
+            <div id="tabelaGradeContainer" class="mt-5" style="display: none;">
+                 <h3 class="mb-3 text-secondary">Grade: <span id="nomeGrade"></span></h3>
+                 <div class="table-responsive">
+                     <table class="table table-bordered table-custom">
+                         <thead>
+                             <tr>
+                                 <th>Disciplina</th>
+                                 <th>Aulas Semanais</th>
+                                 <th>Ações</th>
+                             </tr>
+                         </thead>
+                         <tbody id="gradeHorariosTableBody">
+                         </tbody>
+                     </table>
+                 </div>
+                 <div class="mt-3">
+                     <button id="addDisciplinaBtn" class="btn btn-success"><i class="fas fa-plus me-2"></i> Adicionar nova disciplina</button>
+                     <button id="saveGradeBtn" class="btn btn-primary"><i class="fas fa-save me-2"></i> Salvar Grade</button>
+                     <button id="deleteGradeBtn" class="btn btn-danger" style="display: none;"><i class="fas fa-trash me-2"></i> Excluir Grade</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/cadastroGrade.js"></script>
+</body>
+</html>

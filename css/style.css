@@ -1,0 +1,155 @@
+/*
+CORES PADRÃO IFES
+R50 G160 B65
+HEX #2f9e41
+C75 M0 Y100 K15
+PANTONE 362 C
+R200 G25 B30
+HEX #cd191e
+C0 M100 Y100 K15
+PANTONE 187 C
+R0 G0 B0
+HEX #000000
+C0 M0 Y0 K100
+PANTONE process black C
+*/
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa; /* Um tom de cinza mais claro */
+}
+
+.custom-card-link {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    text-decoration: none; /* Remove sublinhado dos links */
+    color: inherit; /* Mantém a cor do texto do card */
+}
+
+.custom-card-link:hover {
+    transform: translateY(-5px); /* Efeito de elevação */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* Sombra mais pronunciada */
+}
+
+/* Cores customizadas para os cards */
+.bg-info { background-color: #17a2b8 !important; } /* Ciano */
+.bg-success { background-color: #28a745 !important; } /* Verde */
+.bg-warning { background-color: #ffc107 !important; } /* Amarelo */
+.bg-primary { background-color: #007bff !important; } /* Azul padrão */
+
+/* Estilos para as páginas de cadastro e relatório */
+.form-section {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #343a40;
+}
+
+.table-responsive {
+    margin-top: 30px;
+}
+
+.table thead th {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.table tbody tr:hover {
+    background-color: #e2f2ff;
+}
+
+.btn-custom-back {
+    margin-bottom: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ... (Seus estilos existentes) ... */
+
+/* Estilos adicionais para formatação condicional na tabela */
+.table thead th {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    vertical-align: middle; /* Alinha o texto do cabeçalho verticalmente */
+}
+
+/* Colunas de cursos */
+.table th.text-center {
+    font-size: 0.9em; /* Diminui um pouco o tamanho da fonte para os nomes dos cursos */
+    background-color: #0056b3; /* Cor mais escura para o sub-cabeçalho */
+}
+
+
+/* Estilos para a somatória de horas */
+.total-horas {
+    font-weight: bold;
+}
+
+/* Formatação condicional baseada na somatória de horas */
+/* Exemplo: Abaixo de 40h - Alerta (vermelho/laranja) */
+.ch-baixo {
+    background-color: #fff3cd; /* Fundo amarelo claro */
+    color: #856404; /* Texto amarelo escuro */
+}
+.ch-baixo .total-horas {
+    background-color: #ffeeba; /* Cor de fundo para a célula total-horas */
+}
+
+/* Exemplo: Entre 40h e 99h - Normal (verde claro) */
+.ch-normal {
+    background-color: #d4edda; /* Fundo verde claro */
+    color: #155724; /* Texto verde escuro */
+}
+.ch-normal .total-horas {
+    background-color: #c3e6cb; /* Cor de fundo para a célula total-horas */
+}
+
+/* Exemplo: 100h ou mais - Destaque (azul/roxo) */
+.ch-alto {
+    background-color: #cfe2ff; /* Fundo azul claro */
+    color: #052c65; /* Texto azul escuro */
+}
+.ch-alto .total-horas {
+    background-color: #b9d7fd; /* Cor de fundo para a célula total-horas */
+}
+
+.form-section{
+    color: #2f9e41
+}
+
+/* Substitua a cor azul por verde em .bg-primary e .btn-primary */
+.bg-primary, .btn-primary, .table thead th { 
+    background-color: #2f9e41 !important; 
+    border-color: #2f9e41 !important;
+    color: #ffffff; 
+}
+
+/* Substitua a cor ciano por verde */
+.bg-info, .btn-info { 
+    background-color: #2f9e41 !important; 
+    border-color: #2f9e41 !important;
+    color: #ffffff 
+}
+
+/* Substitua a cor amarela por verde */
+.bg-warning, .btn-warning { 
+    background-color: #2f9e41 !important; 
+    border-color: #2f9e41 !important; 
+    color: white !important; /* Para garantir que o texto seja legível */
+}
+
+/* Mantenha a cor verde para .bg-success e .btn-success (já está correta) */
+.bg-success, .btn-success { 
+    background-color: #2f9e41 !important; 
+    border-color: #2f9e41 !important; 
+}
+#relatorioTable tbody tr td:nth-child(4) {
+    white-space: normal;
+}
