@@ -177,7 +177,7 @@
   <script>
     async function carregarAdmin() {
       try {
-        const resposta = await fetch('http://localhost:3000/api/auth/me', { credentials: 'include' });
+        const resposta = await fetch('https://serversgch-nv.onrender.com/auth/me', { credentials: 'include' });
         if (resposta.ok) {
           const data = await resposta.json();
           document.getElementById('adminName').textContent = data.nome;
@@ -192,7 +192,7 @@
 
     document.getElementById('btnLogout').addEventListener('click', async () => {
       try {
-        await fetch('http://localhost:3000/api/auth/logout', {
+        await fetch('https://serversgch-nv.onrender.com/auth/logout', {
         method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
