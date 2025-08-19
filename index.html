@@ -193,9 +193,11 @@
     document.getElementById('btnLogout').addEventListener('click', async () => {
       try {
         await fetch('http://localhost:3000/api/auth/logout', {
-          method: 'POST',
-          credentials: 'include'
-        });
+        method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
         window.location.href = '/pages/login.html';
       } catch (err) {
         alert('Erro ao fazer logout.');
