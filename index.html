@@ -174,38 +174,38 @@
   </main>
 
   <!-- Script -->
-  <script>
-    async function carregarAdmin() {
-      try {
-        const resposta = await fetch('https://serversgch-nv.onrender.com/auth/me', { credentials: 'include' });
-        if (resposta.ok) {
-          const data = await resposta.json();
-          document.getElementById('adminName').textContent = data.nome;
-        } else {
-          window.location.href = '/pages/login.html';
-        }
-      } catch (error) {
-        console.error('Erro ao carregar admin:', error);
+<script>
+  async function carregarAdmin() {
+    try {
+      const resposta = await fetch('https://serversgch-nv.onrender.com/api/auth/me', { credentials: 'include' });
+      if (resposta.ok) {
+        const data = await resposta.json();
+        document.getElementById('adminName').textContent = data.nome;
+      } else {
         window.location.href = '/pages/login.html';
       }
+    } catch (error) {
+      console.error('Erro ao carregar admin:', error);
+      window.location.href = '/pages/login.html';
     }
+  }
 
-    document.getElementById('btnLogout').addEventListener('click', async () => {
-      try {
-        await fetch('https://serversgch-nv.onrender.com/auth/logout', {
+  document.getElementById('btnLogout').addEventListener('click', async () => {
+    try {
+      await fetch('https://serversgch-nv.onrender.com/api/auth/logout', {
         method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, senha })
-    });
-        window.location.href = '/pages/login.html';
-      } catch (err) {
-        alert('Erro ao fazer logout.');
-      }
-    });
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      window.location.href = '/pages/login.html';
+    } catch (err) {
+      alert('Erro ao fazer logout.');
+    }
+  });
 
-    document.addEventListener('DOMContentLoaded', carregarAdmin);
-  </script>
+  document.addEventListener('DOMContentLoaded', carregarAdmin);
+</script>
+
 
 </body>
 </html>
