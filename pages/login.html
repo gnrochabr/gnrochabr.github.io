@@ -129,11 +129,13 @@ document.getElementById('formLogin').addEventListener('submit', async function(e
   const senha = document.getElementById('senha').value;
   const mensagemErro = document.getElementById('mensagemErro');
 
-const resposta = await fetch('https://serversgch-nv.onrender.com/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email, senha })
-});
+  try {
+    const resposta = await fetch('https://serversgch-nv.onrender.com/auth/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
 
     const data = await resposta.json();
 
