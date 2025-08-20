@@ -5,7 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const CONSTANTS = {
-        API_BASE_URL: 'https://serversgch-nv.onrender.com/api',
+        API_BASE_URL: 'https://serversgch-nv.onrender.com',
         OFERTA_ANUAL: 'Anual',
         OFERTA_SEMESTRAL: 'Semestral',
         OUTRAS_OFERTAS: 'Outro'

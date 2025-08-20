@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://serversgch-nv.onrender.com/api';
+const API_BASE_URL = 'https://serversgch-nv.onrender.com';
 
 let sortColumnCursos = 'nome'; 
 let sortDirectionCursos = 'asc'; 
