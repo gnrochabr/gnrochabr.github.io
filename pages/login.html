@@ -138,6 +138,7 @@ document.getElementById('formLogin').addEventListener('submit', async function(e
     });
 
     const data = await resposta.json();
+    console.log(resposta.status, data);
 
     if (resposta.ok) {
       window.location.href = '../index.html';
