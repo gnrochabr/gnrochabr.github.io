@@ -133,8 +133,7 @@ document.getElementById('formLogin').addEventListener('submit', async function(e
     const resposta = await fetch('https://serversgch-nv.onrender.com/auth/login', {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, senha })
+      headers: { 'Content-Type': 'application/json' }
     });
 
     const data = await resposta.json();
