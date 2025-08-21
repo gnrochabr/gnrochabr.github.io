@@ -130,7 +130,7 @@ document.getElementById('formLogin').addEventListener('submit', async function(e
   const mensagemErro = document.getElementById('mensagemErro');
 
   try {
-    const resposta = await fetch('https://serversgchnv.onrender.com/auth/login', {
+    const resposta = await fetch('https://serversgchnv.onrender.com/api/auth/login', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
