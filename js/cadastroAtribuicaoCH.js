@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://serversgch-nv.onrender.com';
+const API_BASE_URL = 'https://serversgchnv.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
     const formSelecaoHorario = document.getElementById('formSelecaoHorario');

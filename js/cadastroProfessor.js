@@ -1,7 +1,7 @@
 // Arquivo: ../js/cadastroProfessor.js
 
 // Constantes e variáveis globais
-const API_BASE_URL = 'https://serversgch-nv.onrender.com';
+const API_BASE_URL = 'https://serversgchnv.onrender.com';
 const DOM = {
     formCadastroProfessor: document.getElementById('formCadastroProfessor'),
     nomeProfessor: document.getElementById('nomeProfessor'),

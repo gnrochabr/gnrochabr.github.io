@@ -1,7 +1,7 @@
 // Arquivo: ../js/cadastroDisciplina.js
 
 // URL base da sua API.
-const API_BASE_URL = 'https://serversgch-nv.onrender.com';
+const API_BASE_URL = 'https://serversgchnv.onrender.com';
 
 // Variáveis de estado para ordenação da tabela.
 let sortColumnDisciplinas = 'nome'; 
