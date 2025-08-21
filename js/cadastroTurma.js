@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://serversgchnv.onrender.com';
+const API_BASE_URL = 'https://serversgchnv.onrender.com/api';
 
 // Variáveis de estado para ordenação
 let sortColumnTurmas = 'nome'; // Coluna de ordenação padrão

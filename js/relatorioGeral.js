@@ -5,7 +5,7 @@
  */
 document.addEventListener('DOMContentLoaded', () => {
     // 1. CONSTANTES E CONFIGURAÇÕES
-    const API_BASE_URL = 'https://serversgchnv.onrender.com';
+    const API_BASE_URL = 'https://serversgchnv.onrender.com/api';
     const DOM = {
         tableHead: document.getElementById('geralTableHead'),
         tableBody: document.getElementById('geralTableBody'),
