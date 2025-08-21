@@ -175,24 +175,29 @@
 
   <!-- Script -->
 <script>
-  async function carregarAdmin() {
+    async function carregarAdmin() {
     try {
-      const resposta = await fetch('https://serversgchnv.onrender.com/auth/me', { credentials: 'include' });
+      // CORREÇÃO APLICADA AQUI: Adicionado o prefixo /api
+      const resposta = await fetch('https://serversgchnv.onrender.com/api/auth/me', { credentials: 'include' });
+      
       if (resposta.ok) {
         const data = await resposta.json();
         document.getElementById('adminName').textContent = data.nome;
       } else {
+        // Se a resposta não for 'ok' (ex: token inválido), redireciona para o login
         window.location.href = '/pages/login.html';
       }
     } catch (error) {
+      // Este é o erro que você está vendo no console
       console.error('Erro ao carregar admin:', error);
       window.location.href = '/pages/login.html';
     }
   }
 
-  document.getElementById('btnLogout').addEventListener('click', async () => {
+document.getElementById('btnLogout').addEventListener('click', async () => {
     try {
-      await fetch('https://serversgchnv.onrender.com/auth/logout', {
+      // Verifique se o /api também está aqui
+      await fetch('https://serversgchnv.onrender.com/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' }
@@ -202,6 +207,7 @@
       alert('Erro ao fazer logout.');
     }
   });
+
 
   document.addEventListener('DOMContentLoaded', carregarAdmin);
 </script>
