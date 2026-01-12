@@ -1,17 +1,15 @@
-name: Deploy Static Content to Pages
+name: Deploy GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Change this if your default branch is 'master'
+    branches: ["main"]
   workflow_dispatch:
 
-# Required permissions for GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -32,7 +30,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository (standard for static sites)
+          # Define o caminho para os arquivos do seu site ('.' para a raiz)
           path: '.'
 
       - name: Deploy to GitHub Pages
