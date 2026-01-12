@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR" x-data="tourismTemplate()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title x-text="t.title + ' | Turismo Nova Venécia'"></title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css"/>
+  
+  <style>
+    /* Estilo para esconder a barra de scroll e manter funcionalidade touch */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Forçar altura fixa nas imagens do slider */
+    .slider-img {
+        width: 280px;
+        height: 200px;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+<header class="bg-[#0f5132] text-white fixed w-full z-50">
+  <div class="flex justify-between items-center p-4 md:px-10">
+    <a href="index.html" class="flex items-center gap-2 max-w-[70%]">
+      <img src="imagens/brasao/brasao_nv.png" alt="Logo" class="w-8 flex-shrink-0">
+      
+      <h1 class="text-sm min-[400px]:text-base md:text-xl font-black uppercase tracking-tighter leading-tight">
+        DESCOBRINDO O AGROTURISMO
+      </h1> 
+    </a>
+    
+    <div class="flex gap-3 flex-shrink-0">
+      <button @click="lang = 'pt'" :class="lang === 'pt'"><span class="fi fi-br"></span></button>
+      <button @click="lang = 'en'" :class="lang === 'en'"><span class="fi fi-us"></span></button>
+      <button @click="lang = 'es'" :class="lang === 'es'"><span class="fi fi-es"></span></button>
+    </div>
+  </div>
+</header>
+
+<section class="relative h-[45vh] flex items-center justify-center text-white overflow-hidden">
+  <img :src="hero" class="absolute w-full h-full object-cover brightness-[0.4]" alt="Hero">
+  <div class="relative text-center px-4">
+    <h2 class="text-4xl md:text-5xl font-black uppercase italic" x-text="t.title"></h2>
+    <p class="text-lg opacity-90" x-text="t.subtitle"></p>
+  </div>
+</section>
+
+<main class="max-w-6xl mx-auto p-4 md:p-8 -mt-12 relative z-10 bg-white shadow-xl rounded-2xl">
+  
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="md:col-span-2">
+      <h3 class="text-xl font-bold text-[#0f5132] mb-3 uppercase tracking-widest border-b-2 border-gray-100 pb-2" x-text="t.about"></h3>
+      <p class="text-gray-600 leading-relaxed text-base" x-text="t.description"></p>
+
+      <h3 class="text-xl font-bold text-[#0f5132] mt-8 mb-4 uppercase tracking-widest" x-text="t.gallery"></h3>
+      
+      <div class="relative group">
+        <div class="flex overflow-x-auto gap-4 no-scrollbar snap-x snap-mandatory pb-2 scroll-smooth">
+          <template x-for="(img, index) in gallery" :key="index">
+            <div class="snap-start">
+              <img :src="img" 
+                   @click="openLightbox(index)" 
+                   class="slider-img rounded-xl shadow-lg cursor-pointer hover:brightness-110 transition active:scale-95" 
+                   alt="Galeria">
+            </div>
+          </template>
+        </div>
+        <div class="flex justify-start gap-1 mt-2">
+            <div class="h-1 w-8 bg-[#0f5132] rounded-full opacity-20"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <button @click="showMap = true" class="w-full bg-[#0f5132] text-white py-5 rounded-2xl font-black shadow-lg flex items-center justify-center gap-3 hover:bg-[#1a6b45] transition-all transform active:scale-95 uppercase">
+         📍 <span x-text="t.location"></span>
+      </button>
+
+      <div class="bg-gray-50 p-6 rounded-2xl border border-dashed border-gray-300 text-center">
+        <p class="text-[10px] uppercase font-bold text-gray-400 mb-4 tracking-tighter" x-text="t.qr"></p>
+        <img :src="qr" class="mx-auto w-32 bg-white p-2 shadow-sm rounded-lg" alt="QR">
+      </div>
+    </div>
+  </div>
+</main>
+
+<div x-show="showMap" 
+     class="fixed inset-0 z-[100] flex items-center justify-center p-3 md:p-6 bg-black/80 backdrop-blur-sm" 
+     x-transition.opacity 
+     @keydown.escape.window="showMap = false">
+  
+  <div class="bg-white rounded-3xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl overflow-hidden" @click.away="showMap = false">
+    <div class="p-4 flex justify-between items-center bg-gray-50 border-b">
+        <span class="font-bold text-[#0f5132]" x-text="t.title"></span>
+        <button @click="showMap = false" class="bg-gray-200 hover:bg-gray-300 w-10 h-10 rounded-full font-bold">✕</button>
+    </div>
+    <div class="flex-grow">
+      <iframe :src="mapEmbed" class="w-full h-full border-0" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+  </div>
+</div>
+
+<div 
+  x-show="lightbox" 
+  x-transition.opacity
+  @keydown.escape.window="lightbox = false" 
+  class="fixed inset-0 bg-black/95 z-[200] flex items-center justify-center"
+  style="display: none;"
+>
+  <button @click="lightbox = false" class="absolute top-6 right-6 text-white text-5xl p-4 z-[210] hover:text-gray-300 transition">&times;</button>
+  
+  <div class="relative w-full h-full flex items-center justify-between px-4 md:px-12" @click.self="lightbox = false">
+      <button @click="prev()" class="text-white text-6xl hover:text-[#0f5132] transition p-4">‹</button>
+      
+      <img :src="gallery[current]" class="max-w-[95%] max-h-[85vh] rounded-lg shadow-2xl object-contain">
+      
+      <button @click="next()" class="text-white text-6xl hover:text-[#0f5132] transition p-4">›</button>
+  </div>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-[#343a40] text-white text-center p-4 mt-10">
+  © 2026 | Prefeitura de Nova Venécia
+</footer>
+
+<script src="dados/locais.js"></script>
+
+<script>
+function tourismTemplate() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id') || 'elefante'; 
+  
+  // Garantir que LOCAIS foi carregado
+  if (typeof LOCAIS === 'undefined') {
+      alert("Erro crítico: Arquivo de dados não encontrado!");
+      return {};
+  }
+  
+  const data = LOCAIS[id] || LOCAIS['elefante'];
+
+  return {
+    lang: 'pt',
+    lightbox: false,
+    showMap: false,
+    current: 0,
+    
+    hero: data.hero,
+    gallery: data.gallery,
+    maps: data.maps,
+    mapEmbed: data.mapEmbed,
+    qr: data.qr,
+    texts: data.texts,
+
+    openLightbox(index) {
+      this.current = index;
+      this.lightbox = true;
+    },
+    next() { this.current = (this.current + 1) % this.gallery.length; },
+    prev() { this.current = (this.current - 1 + this.gallery.length) % this.gallery.length; },
+    get t() { return this.texts[this.lang]; }
+  }
+}
+</script>
+
+</body>
+</html>

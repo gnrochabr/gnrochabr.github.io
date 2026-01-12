@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR" x-data="sliderApp()" x-init="start()">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turismo | Nova Venécia</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+
+<header class="bg-[#0f5132] text-white fixed w-full z-50">
+  <div class="flex justify-between items-center p-4 md:px-10">
+    <a href="index.html" class="flex items-center gap-2 max-w-[70%]">
+      <img src="imagens/brasao/brasao_nv.png" alt="Logo" class="w-8 flex-shrink-0">
+      
+      <h1 class="text-sm min-[400px]:text-base md:text-xl font-black uppercase tracking-tighter leading-tight">
+        DESCOBRINDO O AGROTURISMO
+      </h1> 
+    </a>
+    
+    <div class="flex gap-3 flex-shrink-0">
+      <button @click="lang = 'pt'" :class="lang === 'pt'"><span class="fi fi-br"></span></button>
+      <button @click="lang = 'en'" :class="lang === 'en'"><span class="fi fi-us"></span></button>
+      <button @click="lang = 'es'" :class="lang === 'es'"><span class="fi fi-es"></span></button>
+    </div>
+  </div>
+</header>
+
+<section class="w-full h-[90vh] overflow-hidden relative bg-black">
+
+  <div class="h-full flex flex-col transition-transform duration-1000 ease-in-out"
+       :style="`transform: translateY(-${current * 100}vh)`">
+
+    <template x-for="slide in slides">
+      <div class="h-[100vh] w-full relative flex items-center justify-center flex-shrink-0">
+        <img :src="slide.img"
+             class="absolute inset-0 w-full h-full object-cover opacity-90">
+
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/80"></div>
+
+        <div class="relative z-10 text-white text-center px-4 max-w-4xl">
+          <h2 class="text-5xl md:text-8xl font-black tracking-tighter drop-shadow-2xl uppercase"
+              x-text="slide.title[lang]"></h2>
+          <p class="mt-4 text-xl md:text-3xl font-light drop-shadow-lg"
+             x-text="slide.subtitle[lang]"></p>
+          
+          <a :href="slide.link"
+             class="inline-block mt-10 bg-[#ffc107] hover:bg-[#ffdb4d] text-[#0f5132]
+                    px-10 py-4 rounded-full font-black text-xl transition-all transform hover:scale-110 shadow-2xl">
+            <span x-text="t.explore"></span>
+          </a>
+        </div>
+      </div>
+    </template>
+
+  </div>
+
+  <div class="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-20">
+    <button @click="prev()"
+            class="bg-black/30 hover:bg-white hover:text-black backdrop-blur-md text-white rounded-full w-14 h-14 flex items-center justify-center transition border border-white/30 text-xl font-bold shadow-lg">▲</button>
+    
+    <template x-for="(slide, index) in slides">
+        <button @click="current = index" 
+                class="w-3 rounded-full transition-all duration-500"
+                :class="current === index ? 'h-12 bg-[#ffc107]' : 'h-4 bg-white/40'"></button>
+    </template>
+
+    <button @click="next()"
+            class="bg-black/30 hover:bg-white hover:text-black backdrop-blur-md text-white rounded-full w-14 h-14 flex items-center justify-center transition border border-white/30 text-xl font-bold shadow-lg">▼</button>
+  </div>
+
+</section>
+
+<section class="max-w-4xl mx-auto py-20 px-6 text-center">
+  <h3 class="text-4xl md:text-5xl font-extrabold text-[#0f5132] mb-6" x-text="t.welcome"></h3>
+  <div class="w-32 h-2 bg-[#ffc107] mx-auto rounded-full mb-8"></div>
+  <p class="text-2xl text-gray-600 leading-relaxed font-light" x-text="t.desc"></p>
+</section>
+
+<footer class="bg-[#1a1a1a] text-gray-400 text-center p-10 border-t border-gray-800">
+  <div class="mb-6 opacity-50 flex justify-center gap-6">
+    <span class="text-xs tracking-widest uppercase">Ecoturismo</span>
+    <span class="text-xs tracking-widest uppercase">Cultura</span>
+    <span class="text-xs tracking-widest uppercase">História</span>
+  </div>
+  <img src="../imagens/brasao/brasao_nv.png" alt="Logo" width="50dm" align="center" class="mx-auto mb-4"></img>
+  <p class="text-white font-bold text-lg">Prefeitura Municipal de Nova Venécia</p>
+  <p class="text-sm mt-2 italic">Espírito Santo, Brasil</p>
+</footer>
+
+<script>
+function sliderApp() {
+  return {
+    current: 0,
+    lang: 'pt',
+
+    slides: [
+      {
+        // Imagem real da Pedra do Elefante
+        img: 'https://cdn.esbrasil.com.br/wp-content/uploads/2025/01/Nova-Venecia_nx081212001-1-1536x1024.jpg',
+        link: 'local.html?id=elefante',
+        title: { pt: 'Pedra do Elefante', en: 'Elephant Rock', es: 'Piedra del Elefante' },
+        subtitle: { pt: 'O Gigante de Granito capixaba', en: 'The Granite Giant of Espírito Santo', es: 'El Gigante de Granito' }
+      },
+      {
+        // Imagem real da Pedra da Fortaleza
+        img: '../imagens/fortaleza/fortaleza.jpg',
+        link: 'local.html?id=fortaleza',
+        title: { pt: 'Pedra da Fortaleza', en: 'Fortress Rock', es: 'Piedra de la Fortaleza' },
+        subtitle: { pt: 'Onde o céu toca a montanha', en: 'Where the sky touches the mountain', es: 'Donde el cielo toca la montaña' }
+      },
+
+      {
+        // Imagem real da Cachoeira Boa Vista
+        img: '../imagens/boa vista/cachoeira.jpg',
+        link: 'local.html?id=cachoeiraBoaVista',
+        title: { pt: 'Cachoeira Boa Vista', en: 'Boa Vista Waterfall', es: 'Cascada Boa Vista' },
+        subtitle: { pt: 'Quedas d\'água e lazer em meio à natureza', en: 'Waterfalls and leisure in the middle of nature', es: 'Cascadas y ocio en plena naturaleza' }
+      },
+      {
+        // Imagem real do Santuário da Gameleira
+        img: 'https://terracapixaba.com/wp-content/uploads/2024/02/gameleira-de-nova-venecia-2.webp',
+        link: 'local.html?id=gameleira',
+        title: { pt: 'Caminhos de Fé', en: 'Paths of Faith', es: 'Caminos de Fe' },
+        subtitle: { pt: 'Santuário Mãe Peregrina e Gameleira', en: 'Sanctuary and Ancient Trees', es: 'Santuario y Árboles Milenarios' }
+      }
+    ],
+
+    texts: {
+      pt: {
+        explore: 'QUERO CONHECER',
+        welcome: 'Descubra Nova Venécia',
+        desc: 'Explore o destino mais surpreendente do Noroeste Capixaba. De monumentos naturais colossais a uma herança cultural vibrante.'
+      },
+      en: {
+        explore: 'EXPLORE NOW',
+        welcome: 'Discover Nova Venécia',
+        desc: 'Explore the most surprising destination in the Northwest of Espírito Santo. From colossal natural monuments to a vibrant cultural heritage.'
+      },
+      es: {
+        explore: 'QUIERO CONOCER',
+        welcome: 'Descubra Nova Venécia',
+        desc: 'Explore el destino más sorprendente del Noroeste de Espírito Santo. Desde monumentos naturales colosales hasta una herencia cultural vibrante.'
+      }
+    },
+
+    get t() { return this.texts[this.lang] },
+
+    next() { this.current = (this.current + 1) % this.slides.length },
+    prev() { this.current = (this.current - 1 + this.slides.length) % this.slides.length },
+    start() { setInterval(() => this.next(), 5000) }
+  }
+}
+</script>
+
+</body>
+</html>
